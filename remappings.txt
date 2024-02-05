@@ -5,5 +5,4 @@
 ds-test/=lib/forge-std/lib/ds-test/src/
 forge-std/=lib/forge-std/src/
 hardhat/=node_modules/hardhat/
-openzeppelin-contracts/=node_modules/@storyprotocol/contracts/lib/reference/lib/openzeppelin-contracts/
 reference/=node_modules/@storyprotocol/contracts/lib/reference/

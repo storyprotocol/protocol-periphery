@@ -42,7 +42,7 @@ contract MockERC721MetadataProvider is IERC721MetadataProvider, Initializable {
     /// @param tokenId The ERC-721 token identifier whose metadata is being set.
     /// @param data The bytes-encoded metadata to set for the token.
     function setMetadata(uint256 tokenId, bytes calldata data) external {
-        TokenMetadata memory decoded = abi.decode(data, (TokenMetadata));
+        abi.decode(data, (TokenMetadata));
         _metadata[tokenId] = data;
     }
 

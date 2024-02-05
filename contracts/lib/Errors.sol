@@ -32,8 +32,24 @@ library Errors {
     //                          ERC-721 Metadata Provider                    ///
     ////////////////////////////////////////////////////////////////////////////
 
+    /// @notice The provided token description is not valid.
+    error ERC721MetadataProvider__DescriptionInvalid();
+
+    /// @notice The provided token image is not valid.
+    error ERC721MetadataProvider__ImageInvalid();
+
     /// @notice The metadata provided is not valid.
     error ERC721MetadataProvider__MetadataInvalid();
+
+    /// @notice The provided token name is not valid.
+    error ERC721MetadataProvider__NameInvalid();
+
+    /// @notice The caller is not the token bound to the metadata provider.
+    error ERC721MetadataProvider__TokenInvalid();
+
+    /// @notice The provided token URL is not valid.
+    error ERC721MetadataProvider__URLInvalid();
+
 
     ////////////////////////////////////////////////////////////////////////////
     //                            ERC-721 SP NFT                              //

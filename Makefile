@@ -47,7 +47,7 @@ format:
 coverage:
 	mkdir -p coverage
 	forge coverage --report lcov --fork-url https://rpc.ankr.com/eth --fork-block-number 19042069
-	lcov --remove lcov.info -o coverage/lcov.info 'test/*' 'script/*' 'contracts/mocks/*' --rc branch_coverage=1
+	lcov --remove lcov.info -o coverage/lcov.info 'test/*' 'script/*' --rc branch_coverage=1
 	genhtml coverage/lcov.info -o coverage --rc branch_coverage=1 --ignore-errors category
 
 abi:

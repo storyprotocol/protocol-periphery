@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.23;
 
-import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import { IERC721MetadataProvider } from "contracts/interfaces/nft/IERC721MetadataProvider.sol";
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
@@ -11,9 +10,8 @@ import { Errors } from "contracts/lib/Errors.sol";
 /// @title Story Protocol ERC-721 NFT.
 /// @notice Default NFT contract used for representing new IP on Story Protocol.
 contract ERC721SPNFT is ERC721Cloneable, Ownable2StepUpgradeable, ReentrancyGuardUpgradeable {
-
     /// @notice The Story Protocol NFT factory contract address.
-    address public immutable factory;
+    address public immutable FACTORY;
 
     /// @notice Checks whether an address is a registered minter for the collection.
     mapping(address => bool) public isMinter;
@@ -27,7 +25,7 @@ contract ERC721SPNFT is ERC721Cloneable, Ownable2StepUpgradeable, ReentrancyGuar
     /// @notice Creates the ERC-721 SP NFT implementation contract.
     /// @param factoryAddr The address of the SP NFT factory.
     constructor(address factoryAddr) {
-        factory = factoryAddr;
+        FACTORY = factoryAddr;
     }
 
     /// @notice Initializes the Story Protocol ERC-721 token contract.
@@ -45,7 +43,7 @@ contract ERC721SPNFT is ERC721Cloneable, Ownable2StepUpgradeable, ReentrancyGuar
         string memory tokenName,
         string memory tokenSymbol
     ) external initializer {
-        if (msg.sender != factory) {
+        if (msg.sender != FACTORY) {
             revert Errors.ERC721SPNFT__FactoryInvalid();
         }
         _metadataProvider = IERC721MetadataProvider(provider);

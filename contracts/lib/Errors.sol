@@ -5,7 +5,6 @@ pragma solidity ^0.8.23;
 /// @title Errors Library
 /// @notice Library for all Story Protocol periphery contract errors.
 library Errors {
-
     ////////////////////////////////////////////////////////////////////////////
     //                                ERC-721                                 //
     ////////////////////////////////////////////////////////////////////////////
@@ -49,7 +48,6 @@ library Errors {
 
     /// @notice The provided token URL is not valid.
     error ERC721MetadataProvider__URLInvalid();
-
 
     ////////////////////////////////////////////////////////////////////////////
     //                            ERC-721 SP NFT                              //

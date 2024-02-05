@@ -12,7 +12,6 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 /// @title ERC-721 Metadata Provider
 /// @notice Contract for storing ERC-721 JSON compliant metadata.
 contract ERC721MetadataProvider is IERC721MetadataProvider, Initializable {
-
     /// @notice Gets the address associated with IP asset metadata rendering.
     // IPAssetRenderer public immutable IP_ASSET_RENDERER;
 
@@ -106,15 +105,9 @@ contract ERC721MetadataProvider is IERC721MetadataProvider, Initializable {
             attributes = string.concat(
                 attributes,
                 bytes(attributes).length == 0 ? "" : ", ",
-                string(
-                    abi.encodePacked(
-                        '{"trait_type": "',
-                        attr[i].key,
-                        '", "value": "',
-                        attr[i].value,
-                        '"}'
-                    )
-                )
+                /* solhint-disable */
+                string(abi.encodePacked('{"trait_type": "', attr[i].key, '", "value": "', attr[i].value, '"}'))
+                /* solhint-enable */
             );
         }
         return
@@ -144,13 +137,7 @@ contract ERC721MetadataProvider is IERC721MetadataProvider, Initializable {
             )
             /* solhint-enable */
         );
-        return
-            string(
-                abi.encodePacked(
-                    "data:application/json;base64,",
-                    Base64.encode(bytes(metadata))
-                )
-            );
+        return string(abi.encodePacked("data:application/json;base64,", Base64.encode(bytes(metadata))));
     }
 
     /// @notice Gets the address of the NFT whose metadata is being provided for.

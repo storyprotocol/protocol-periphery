@@ -10,7 +10,6 @@ import { Errors } from "contracts/lib/Errors.sol";
 /// @title Minimal ERC-721 Cloneable Contract
 /// @notice Minimal cloneable ERC-721 contract supporting the metadata extension.
 abstract contract ERC721Cloneable is IERC721Metadata, Initializable {
-
     /// @notice ERC-721 collection-wide token name.
     string public name;
 
@@ -39,10 +38,7 @@ abstract contract ERC721Cloneable is IERC721Metadata, Initializable {
     /// @dev Initializes a new ERC721 Cloneable NFT.
     /// @param tokenName The name to set for the NFT collection.
     /// @param tokenSymbol The symbol to set for the NFT collection.
-    function __ERC721Cloneable_init(
-        string memory tokenName,
-        string memory tokenSymbol
-    ) internal onlyInitializing {
+    function __ERC721Cloneable_init(string memory tokenName, string memory tokenSymbol) internal onlyInitializing {
         name = tokenName;
         symbol = tokenSymbol;
     }
@@ -77,18 +73,12 @@ abstract contract ERC721Cloneable is IERC721Metadata, Initializable {
     /// @param to The new owner address of the NFT being transferred.
     /// @param data Additional data in bytes to pass to the receiver.
     /// @param tokenId The id of the NFT being transferred.
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory data
-    ) external {
+    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) external {
         transferFrom(from, to, tokenId);
         if (
             to.code.length != 0 &&
-                IERC721Receiver(to).onERC721Received(msg.sender, from, tokenId, data)
-                !=
-                IERC721Receiver.onERC721Received.selector
+            IERC721Receiver(to).onERC721Received(msg.sender, from, tokenId, data) !=
+            IERC721Receiver.onERC721Received.selector
         ) {
             revert Errors.ERC721__SafeTransferUnsupported();
         }
@@ -100,17 +90,12 @@ abstract contract ERC721Cloneable is IERC721Metadata, Initializable {
     /// @param from The existing owner address of the NFT to be transferred.
     /// @param to The new owner address of the NFT being transferred.
     /// @param tokenId The id of the NFT being transferred.
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) external {
+    function safeTransferFrom(address from, address to, uint256 tokenId) external {
         transferFrom(from, to, tokenId);
         if (
             to.code.length != 0 &&
-                IERC721Receiver(to).onERC721Received(msg.sender, from, tokenId, "")
-                !=
-                IERC721Receiver.onERC721Received.selector
+            IERC721Receiver(to).onERC721Received(msg.sender, from, tokenId, "") !=
+            IERC721Receiver.onERC721Received.selector
         ) {
             revert Errors.ERC721__SafeTransferUnsupported();
         }
@@ -123,20 +108,12 @@ abstract contract ERC721Cloneable is IERC721Metadata, Initializable {
     /// @param from The existing owner address of the NFT being transferred.
     /// @param to The new owner address of the NFT being transferred.
     /// @param tokenId The id of the NFT being transferred.
-    function transferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public virtual {
+    function transferFrom(address from, address to, uint256 tokenId) public virtual {
         if (from != ownerOf[tokenId]) {
             revert Errors.ERC721__OwnerInvalid();
         }
 
-        if (
-            msg.sender != from &&
-            msg.sender != getApproved[tokenId] &&
-            !isApprovedForAll[from][msg.sender]
-        ) {
+        if (msg.sender != from && msg.sender != getApproved[tokenId] && !isApprovedForAll[from][msg.sender]) {
             revert Errors.ERC721__SenderUnauthorized();
         }
 
@@ -159,8 +136,7 @@ abstract contract ERC721Cloneable is IERC721Metadata, Initializable {
     /// @param id The ERC-165 interface identifier.
     /// @return True if interface id `id` is supported, false otherwise.
     function supportsInterface(bytes4 id) public view virtual override(IERC165) returns (bool) {
-        return id == _ERC165_INTERFACE_ID ||
-               id == _ERC721_INTERFACE_ID;
+        return id == _ERC165_INTERFACE_ID || id == _ERC721_INTERFACE_ID;
     }
 
     /// @dev Mints an NFT of identifier `tokenId` to recipient address `to`.
@@ -203,4 +179,3 @@ abstract contract ERC721Cloneable is IERC721Metadata, Initializable {
         emit Transfer(owner, address(0), tokenId);
     }
 }
-

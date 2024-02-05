@@ -4,7 +4,6 @@ pragma solidity ^0.8.23;
 /// @title ERC-721 Metadata Provider Interface
 /// @notice Interace for supporting ERC-721 token metadata provisioning.
 interface IERC721MetadataProvider {
-
     /// @notice Initializes the metadata provider for the provided erc-721 token.
     /// @param token The address of the ERC-721 metadata is being provided for.
     /// @param data Settings in bytes to configure for the provider.

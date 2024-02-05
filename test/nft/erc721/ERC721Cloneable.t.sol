@@ -51,6 +51,7 @@ contract ERC721CloneableTest is ERC721BaseTest {
         uint256 balance = cloneable.balanceOf(alice);
         vm.expectEmit({ emitter: address(cloneable) });
         emit IERC721.Transfer(alice, address(0), TEST_TOKEN);
+        vm.prank(alice);
         cloneable.burn(TEST_TOKEN);
         assertEq(cloneable.balanceOf(alice), balance - 1);
         assertEq(cloneable.totalSupply(), totalSupply - 1);
@@ -66,6 +67,7 @@ contract ERC721CloneableTest is ERC721BaseTest {
     /// @notice Tests that burning already burned tokens revert.
     function test_ERC721Cloneable_Burn_Reverts_DuplicateBurn() public {
         _mintToken(alice, TEST_TOKEN);
+        vm.prank(alice);
         cloneable.burn(TEST_TOKEN);
         vm.expectRevert(Errors.ERC721__TokenNonExistent.selector);
         cloneable.burn(TEST_TOKEN);

@@ -27,4 +27,21 @@ library Errors {
 
     /// @notice The provided token does not exist.
     error ERC721__TokenNonExistent();
+
+    ////////////////////////////////////////////////////////////////////////////
+    //                          ERC-721 Metadata Provider                    ///
+    ////////////////////////////////////////////////////////////////////////////
+
+    /// @notice The metadata provided is not valid.
+    error ERC721MetadataProvider__MetadataInvalid();
+
+    ////////////////////////////////////////////////////////////////////////////
+    //                            ERC-721 SP NFT                              //
+    ////////////////////////////////////////////////////////////////////////////
+
+    /// @notice The caller must be the SP NFT factory.
+    error ERC721SPNFT__FactoryInvalid();
+
+    /// @notice The caller is not an approved minter for the contract.
+    error ERC721SPNFT__MinterInvalid();
 }

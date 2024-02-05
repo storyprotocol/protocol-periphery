@@ -16,9 +16,6 @@ abstract contract ERC721BaseTest is TransferHelper {
     // Expected return value by contract recipients for ERC-721 safe transfers.
     bytes4 constant ERC721_RECEIVER_MAGIC_VALUE = bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));
 
-    /// @notice Default test token id to use.
-    uint256 public TEST_TOKEN = 0;
-
     /// @notice The ERC721 token contract SUT.
     IERC721Metadata public token;
 

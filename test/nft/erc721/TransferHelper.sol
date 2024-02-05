@@ -14,6 +14,9 @@ abstract contract TransferHelper is BaseTest {
     /// @notice The ERC721 contract SUT.
     IERC721 public erc721;
 
+    /// @notice Default test token id to use.
+    uint256 public TEST_TOKEN = 0;
+
     // Used for identifying transfer types for test reuse.
     enum TransferType { TRANSFER_FROM, SAFE_TRANSFER_FROM }
 
@@ -50,10 +53,10 @@ abstract contract TransferHelper is BaseTest {
     /// @notice Creates a mixed set of ERC721 transfers where the sender is not the token owner.
     function sut_Transfers_TransferFrom_Operator() internal returns (Transfer[] memory) {
         delete _ts;
-        _ts.push(_buildSafeTransferFrom(cal, alice, bob, 0, ""));
-        _ts.push(_buildTransferFrom(bob, alice, alice, 0));
-        _ts.push(_buildSafeTransferFrom(cal, alice, cal, 99, SAFE_TRANSFER_DATA));
-        _ts.push(_buildTransferFrom(bob, alice, alice, 99));
+        _ts.push(_buildSafeTransferFrom(cal, alice, bob, TEST_TOKEN, ""));
+        _ts.push(_buildTransferFrom(bob, alice, alice, TEST_TOKEN));
+        _ts.push(_buildSafeTransferFrom(cal, alice, cal, TEST_TOKEN, SAFE_TRANSFER_DATA));
+        _ts.push(_buildTransferFrom(bob, alice, alice, TEST_TOKEN));
         return _ts;
     }
 
@@ -61,18 +64,18 @@ abstract contract TransferHelper is BaseTest {
     /// @notice Creates a mixed set of ERC721 transfers.
     function sut_Transfers_TransferFrom() internal returns (Transfer[] memory) {
         delete _ts;
-        _ts.push(_buildSafeTransferFrom(alice, alice, bob, 0, ""));
-        _ts.push(_buildTransferFrom(alice, alice, alice, 0));
-        _ts.push(_buildSafeTransferFrom(alice, alice, bob, 99, SAFE_TRANSFER_DATA));
-        _ts.push(_buildTransferFrom(alice, alice, alice, 99));
+        _ts.push(_buildSafeTransferFrom(alice, alice, bob, TEST_TOKEN, ""));
+        _ts.push(_buildTransferFrom(alice, alice, alice, TEST_TOKEN));
+        _ts.push(_buildSafeTransferFrom(alice, alice, bob, TEST_TOKEN, SAFE_TRANSFER_DATA));
+        _ts.push(_buildTransferFrom(alice, alice, alice, TEST_TOKEN));
         return _ts;
     }
 
     /// @notice Creates a set of ERC721 `transferFrom` transfers.
     function sut_Transfers_SafeTransferFrom() internal returns (Transfer[] memory) {
         delete _ts;
-        _ts.push(_buildSafeTransferFrom(alice, alice, bob, 0, SAFE_TRANSFER_DATA));
-        _ts.push(_buildSafeTransferFrom(alice, alice, bob, 0, ""));
+        _ts.push(_buildSafeTransferFrom(alice, alice, bob, TEST_TOKEN, SAFE_TRANSFER_DATA));
+        _ts.push(_buildSafeTransferFrom(alice, alice, bob, TEST_TOKEN, ""));
         return _ts;
     }
 

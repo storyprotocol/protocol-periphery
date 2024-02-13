@@ -186,7 +186,7 @@ contract ERC721MetadataProviderTest is BaseTest {
         attributes[1] = Metadata.Attribute(ATTR_2_KEY, ATTR_2_VALUE);
         attributes[2] = Metadata.Attribute(ATTR_3_KEY, ATTR_3_VALUE);
 
-        Metadata.TokenData memory tokenData = Metadata.TokenData({
+        Metadata.TokenMetadata memory tokenData = Metadata.TokenMetadata({
             name: name,
             description: description,
             externalUrl: url,

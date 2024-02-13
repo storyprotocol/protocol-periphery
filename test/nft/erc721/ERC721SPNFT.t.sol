@@ -11,9 +11,6 @@ import { MockERC721MetadataProvider } from "test/mocks/nft/MockERC721MetadataPro
 /// @title ERC721 SP NFT Test Contract
 contract ERC721SPNFTTest is ERC721BaseTest {
 
-    string internal constant _NAME = "MOCK_NAME";
-    string internal constant _SYMBOL = "MOCK_SYMBOL";
-
     /// @notice Mock collection-wide contract URI.
     string MOCK_CONTRACT_URI = "https://storyprotocol.xyz";
 
@@ -38,6 +35,13 @@ contract ERC721SPNFTTest is ERC721BaseTest {
     /// @notice Mock ERC-721 metadata provider.
     MockERC721MetadataProvider public provider;
 
+    /// @notice The maximum token supply to configure for the collection.
+    uint256 MAX_SUPPLY;
+
+    /// Mock metadata to use for the ERC-721 SP NFT.
+    string internal constant _NAME = "MOCK_NAME";
+    string internal constant _SYMBOL = "MOCK_SYMBOL";
+
     /// @notice Initializes the ERC721 SP NFT test contract.
     function setUp() public virtual override(ERC721BaseTest) {
         ERC721BaseTest.setUp();
@@ -61,7 +65,8 @@ contract ERC721SPNFTTest is ERC721BaseTest {
             address(provider),
             "",
             _NAME,
-            _SYMBOL
+            _SYMBOL,
+            MAX_SUPPLY
         );
     }
 
@@ -167,7 +172,8 @@ contract ERC721SPNFTTest is ERC721BaseTest {
             address(provider),
             abi.encode(metadata),
             _NAME,
-            _SYMBOL
+            _SYMBOL,
+            MAX_SUPPLY
         );
         return address(spNFT);
     }

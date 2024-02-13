@@ -9,6 +9,9 @@ library Errors {
     //                                ERC-721                                 //
     ////////////////////////////////////////////////////////////////////////////
 
+    /// @notice The maximum supply for the collection has been reached.
+    error ERC721__MaxSupplyReached();
+
     /// @notice The owner is not valid.
     error ERC721__OwnerInvalid();
 
@@ -58,4 +61,14 @@ library Errors {
 
     /// @notice The caller is not an approved minter for the contract.
     error ERC721SPNFT__MinterInvalid();
+
+    ////////////////////////////////////////////////////////////////////////////
+    //                         Story Protocol Gateway                         //
+    ////////////////////////////////////////////////////////////////////////////
+//
+    /// @notice The input IP NFT collection type is not supported.
+    error SPG__CollectionTypeUnsupported();
+
+    /// @notice The owner is not allowed to perform this registration.
+    error SPG__InvalidOwner();
 }

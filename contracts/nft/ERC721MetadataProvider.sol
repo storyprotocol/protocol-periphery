@@ -19,7 +19,7 @@ contract ERC721MetadataProvider is IERC721MetadataProvider, Initializable {
     IERC721SPNFT internal _spNFT;
 
     /// @dev Maps individual SP NFTs to their stored token metadata.
-    mapping(uint256 => Metadata.TokenData) internal _tokenMetadata;
+    mapping(uint256 => Metadata.TokenMetadata) internal _tokenMetadata;
 
     /// @dev Gets the collection-wide metadata.
     Metadata.ContractData internal _contractMetadata;
@@ -46,27 +46,31 @@ contract ERC721MetadataProvider is IERC721MetadataProvider, Initializable {
         if (msg.sender != address(_spNFT)) {
             revert Errors.ERC721MetadataProvider__TokenInvalid();
         }
-        Metadata.TokenData storage tokenMetadata = _tokenMetadata[tokenId];
-        Metadata.TokenData memory decoded = abi.decode(data, (Metadata.TokenData));
+        Metadata.TokenMetadata storage tokenMetadata = _tokenMetadata[tokenId];
+        Metadata.TokenMetadata memory decoded = abi.decode(data, (Metadata.TokenMetadata));
 
-        if (bytes(decoded.name).length == 0) {
-            revert Errors.ERC721MetadataProvider__NameInvalid();
-        }
+        // TODO: Confirm whether validation on name should be performed.
+        // if (bytes(decoded.name).length == 0) {
+        //     revert Errors.ERC721MetadataProvider__NameInvalid();
+        // }
         tokenMetadata.name = decoded.name;
 
-        if (bytes(decoded.description).length == 0) {
-            revert Errors.ERC721MetadataProvider__DescriptionInvalid();
-        }
+        // TODO: Confirm whether validation on description should be performed.
+        // if (bytes(decoded.description).length == 0) {
+        //     revert Errors.ERC721MetadataProvider__DescriptionInvalid();
+        // }
         tokenMetadata.description = decoded.description;
 
-        if (bytes(decoded.externalUrl).length == 0) {
-            revert Errors.ERC721MetadataProvider__URLInvalid();
-        }
+        // TODO: Confirm whether validation on external URL should be performed.
+        // if (bytes(decoded.externalUrl).length == 0) {
+        //     revert Errors.ERC721MetadataProvider__URLInvalid();
+        // }
         tokenMetadata.externalUrl = decoded.externalUrl;
 
-        if (bytes(decoded.image).length == 0) {
-            revert Errors.ERC721MetadataProvider__ImageInvalid();
-        }
+        // TODO: Confirm whether validation on image should be performed.
+        // if (bytes(decoded.image).length == 0) {
+        //     revert Errors.ERC721MetadataProvider__ImageInvalid();
+        // }
         tokenMetadata.image = decoded.image;
 
         Metadata.Attribute[] memory attributes = decoded.attributes;
@@ -77,11 +81,10 @@ contract ERC721MetadataProvider is IERC721MetadataProvider, Initializable {
 
     /// @notice Generates an ERC721 Metadata JSON compliant URI for the NFT.
     /// @param tokenId The ERC-721 identifier of the NFT being queried.
-
     /// TODO: Create a JSON utility lib for more efficient encoding / decoding.
     /// TODO: Add storage caching and other low-level optimizations.
     function tokenURI(uint256 tokenId) external view returns (string memory) {
-        Metadata.TokenData memory metadata = _tokenMetadata[tokenId];
+        Metadata.TokenMetadata memory metadata = _tokenMetadata[tokenId];
         string memory baseMetadata = string(
             /* solhint-disable */
             abi.encodePacked(

@@ -6,6 +6,7 @@ import { IERC721SPNFT } from "contracts/interfaces/nft/IERC721SPNFT.sol";
 import { IERC721Metadata } from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import { IERC721MetadataProvider } from "contracts/interfaces/nft/IERC721MetadataProvider.sol";
 import { ERC721Cloneable } from "contracts/nft/ERC721Cloneable.sol";
+import { SPG } from "contracts/lib/SPG.sol";
 
 /// @title Mock ERC721 Cloneable
 contract MockERC721SPNFT is IERC721SPNFT, ERC721Cloneable {
@@ -31,11 +32,12 @@ contract MockERC721SPNFT is IERC721SPNFT, ERC721Cloneable {
     /// @notice Mints a new SP NFT with the provided metadata.
     /// @param to The address that will receive the minted NFT.
     /// @param data Bytes-encoded metadata to use for the IP NFT.
-    function mint(address to, bytes memory data) external {
-        uint256 tokenId = totalSupply;
+    function mint(address to, bytes memory data) external returns (uint256) {
+        uint256 tokenId = totalSupply++;
         _mint(to, tokenId);
         _metadataProviders[tokenId] = _metadataProvider;
         _metadataProvider.setMetadata(tokenId, data);
+        return tokenId;
     }
 
     /// @notice Burns a token owned by the calling address.
@@ -64,4 +66,10 @@ contract MockERC721SPNFT is IERC721SPNFT, ERC721Cloneable {
     function contractURI() external view returns (string memory) {
         return _metadataProvider.contractURI();
     }
+
+    /// @notice Configures the minting settings for an ongoing Story Protocol mint.
+    function configureMint(
+        address spg,
+        SPG.MintSettings calldata mintSettings
+    ) external {}
 }

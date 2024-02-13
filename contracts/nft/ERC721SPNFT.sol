@@ -1,11 +1,17 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.23;
 
-import { IERC721MetadataProvider } from "contracts/interfaces/nft/IERC721MetadataProvider.sol";
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import { ERC721Cloneable } from "contracts/nft/ERC721Cloneable.sol";
-import { Errors } from "contracts/lib/Errors.sol";
+import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+
+import { IERC721MetadataProvider } from "..//interfaces/nft/IERC721MetadataProvider.sol";
+import { ERC721Cloneable } from "./ERC721Cloneable.sol";
+import { Errors } from "../lib/Errors.sol";
+import { SPG } from "../lib/SPG.sol";
+import { IStoryProtocolGateway } from "../interfaces/IStoryProtocolGateway.sol";
+import { IERC721SPNFT } from "../interfaces/nft/IERC721SPNFT.sol";
+import { IStoryProtocolToken } from "../interfaces/IStoryProtocolToken.sol";
 
 /// @title Story Protocol ERC-721 NFT.
 /// @notice Default NFT contract used for representing new IP on Story Protocol.
@@ -15,6 +21,9 @@ contract ERC721SPNFT is ERC721Cloneable, Ownable2StepUpgradeable, ReentrancyGuar
 
     /// @notice Checks whether an address is a registered minter for the collection.
     mapping(address => bool) public isMinter;
+
+    /// @notice Tracks the max supply allowed for the collection.
+    uint256 maxSupply;
 
     /// @dev Gets the current metadata provider used for new NFTs in the collection.
     IERC721MetadataProvider internal _metadataProvider;
@@ -35,17 +44,20 @@ contract ERC721SPNFT is ERC721Cloneable, Ownable2StepUpgradeable, ReentrancyGuar
     /// @param providerInitData Initial data to set for the metadata provider.
     /// @param tokenName The name for the collection-wide NFT contract.
     /// @param tokenSymbol The symbol for the collection-wide NFT contract.
+    /// @param maxSupplyLimit The max supply allowed for the collection.
     function initialize(
         address owner,
         address spg,
         address provider,
         bytes memory providerInitData,
         string memory tokenName,
-        string memory tokenSymbol
+        string memory tokenSymbol,
+        uint256 maxSupplyLimit
     ) external initializer {
         if (msg.sender != FACTORY) {
             revert Errors.ERC721SPNFT__FactoryInvalid();
         }
+        maxSupply = maxSupplyLimit;
         _metadataProvider = IERC721MetadataProvider(provider);
         isMinter[spg] = true;
         __Ownable_init(owner);
@@ -58,10 +70,13 @@ contract ERC721SPNFT is ERC721Cloneable, Ownable2StepUpgradeable, ReentrancyGuar
     /// @param to The address that will receive the minted NFT.
     /// @param data Bytes-encoded metadata to use for the IP NFT.
     function mint(address to, bytes memory data) external nonReentrant {
+        uint256 tokenId = totalSupply;
         if (!isMinter[msg.sender]) {
             revert Errors.ERC721SPNFT__MinterInvalid();
         }
-        uint256 tokenId = totalSupply;
+        if (totalSupply == maxSupply) {
+            revert Errors.ERC721__MaxSupplyReached();
+        }
         _mint(to, tokenId);
         _metadataProviders[tokenId] = _metadataProvider;
         _metadataProvider.setMetadata(tokenId, data);
@@ -91,6 +106,16 @@ contract ERC721SPNFT is ERC721Cloneable, Ownable2StepUpgradeable, ReentrancyGuar
         _metadataProvider.initialize(address(this), initData);
     }
 
+    /// @notice Configures the minting settings for an ongoing Story Protocol mint.
+    /// @param spg The address of an allowed SPG contract given access to mint the token.
+    /// @param settings The new settings to configure for the mint.
+    function configureMint(address spg, SPG.MintSettings calldata settings) external onlyOwner {
+        if (!isMinter[spg]) {
+            revert Errors.ERC721SPNFT__MinterInvalid();
+        }
+        IStoryProtocolGateway(spg).configureMint(settings);
+    }
+
     /// @notice Gets the metadata provider used for new NFT mints.
     function metadataProvider() external view returns (address) {
         return address(_metadataProvider);
@@ -111,5 +136,15 @@ contract ERC721SPNFT is ERC721Cloneable, Ownable2StepUpgradeable, ReentrancyGuar
     /// @notice Gets the contract URI associated with the SP NFT collection.
     function contractURI() external view returns (string memory) {
         return _metadataProvider.contractURI();
+    }
+
+    /// @notice Checks if interface of identifier `id` is supported.
+    /// @param id The ERC-165 interface identifier.
+    /// @return True if interface id `id` is supported, false otherwise.
+    function supportsInterface(bytes4 id) public view virtual override(ERC721Cloneable) returns (bool) {
+        return 
+            id == type(IStoryProtocolToken).interfaceId ||
+            id == type(IERC721SPNFT).interfaceId ||
+            super.supportsInterface(id);
     }
 }

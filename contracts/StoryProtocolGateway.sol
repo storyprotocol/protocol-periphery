@@ -16,25 +16,24 @@ import { SPG } from "./lib/SPG.sol";
 import { Metadata } from "./lib/Metadata.sol";
 import { IStoryProtocolGateway } from "./interfaces/IStoryProtocolGateway.sol";
 import { IStoryProtocolToken } from "./interfaces/IStoryProtocolToken.sol";
-import { ERC721SPNFTFactory }  from "./nft/ERC721SPNFTFactory.sol";
+import { ERC721SPNFTFactory } from "./nft/ERC721SPNFTFactory.sol";
 import { Errors } from "./lib/Errors.sol";
 import { SPG } from "./lib/SPG.sol";
 
 /// @title Story Protocol Gateway
 /// @notice The Story Protocol Gateway serves as the main entrypoint to secure
-///         IP interactions in Story Protocol. Users should call this contract 
+///         IP interactions in Story Protocol. Users should call this contract
 ///         directly when registering NFTs or new IPs into the protocol.
 /// TODOs:
-///  - Add signature and merkle-proof based minting alternatives. Currently the SPG 
+///  - Add signature and merkle-proof based minting alternatives. Currently the SPG
 ///    only supports public mints using SP NFTs for mint-and-register functions.
 ///  - Add support for minting and IP registration fees based on the collection.
 contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolGateway {
-
     /// @notice The module used for licensing.
     ILicensingModule public immutable LICENSING_MODULE;
 
     /// @notice The global protocol-wide IP asset registry.
-    IPAssetRegistry  public immutable IP_ASSET_REGISTRY;
+    IPAssetRegistry public immutable IP_ASSET_REGISTRY;
 
     /// @notice The current resolver to use for new record registration.
     IPResolver public metadataResolver;
@@ -63,11 +62,7 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
     /// @param ipAssetRegistry The protocol-wide global IP asset registry.
     /// @param licensingModule The IP licensing module.
     /// @param resolver Default resolver to use for setting custom IP metadata.
-    constructor(
-        address ipAssetRegistry,
-        address licensingModule,
-        address resolver
-    ) {
+    constructor(address ipAssetRegistry, address licensingModule, address resolver) {
         IP_ASSET_REGISTRY = IPAssetRegistry(ipAssetRegistry);
         LICENSING_MODULE = ILicensingModule(licensingModule);
         metadataResolver = IPResolver(resolver);
@@ -95,7 +90,6 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
         return ipCollection;
     }
 
-
     /// @notice Registers an existing NFT into the protocol as an IP Asset.
     /// @param policyId The policy that will identify the licensing terms of the IP.
     /// @param tokenContract The address of the contract of the NFT being registered.
@@ -107,15 +101,16 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
         uint256 tokenId,
         Metadata.IPMetadata calldata ipMetadata
     ) external onlyAuthorized(tokenContract, tokenId) returns (address) {
-        return _registerIp(
-            policyId,
-            tokenContract,
-            tokenId,
-            ipMetadata.name,
-            ipMetadata.hash,
-            ipMetadata.url,
-            ipMetadata.customMetadata
-        );
+        return
+            _registerIp(
+                policyId,
+                tokenContract,
+                tokenId,
+                ipMetadata.name,
+                ipMetadata.hash,
+                ipMetadata.url,
+                ipMetadata.customMetadata
+            );
     }
 
     /// @notice Mints a Story Protocol NFT and registers it into the protocol as an IP asset.
@@ -153,16 +148,17 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
         uint256 tokenId,
         Metadata.IPMetadata calldata ipMetadata
     ) external onlyAuthorized(tokenContract, tokenId) returns (address) {
-        return _registerDerivativeIp(
-            licenseIds,
-            minRoyalty,
-            tokenContract,
-            tokenId,
-            ipMetadata.name,
-            ipMetadata.hash,
-            ipMetadata.url,
-            ipMetadata.customMetadata
-        );
+        return
+            _registerDerivativeIp(
+                licenseIds,
+                minRoyalty,
+                tokenContract,
+                tokenId,
+                ipMetadata.name,
+                ipMetadata.hash,
+                ipMetadata.url,
+                ipMetadata.customMetadata
+            );
     }
 
     /// @notice Mints and registers a Story Protocol NFT into the protocol as an IP asset derivative.
@@ -213,7 +209,7 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
     }
 
     /// @notice Gets the name of the enrolled frontend as a module.
-    function name() external override(IModule) pure returns (string memory) {
+    function name() external pure override(IModule) returns (string memory) {
         return "SPG";
     }
 
@@ -301,7 +297,7 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
     }
 
     /// @dev Sets custom metadata for an IPA using the default resolver contract.
-    function  _setCustomIpMetadata(address ipId, Metadata.Attribute[] calldata metadata) internal {
+    function _setCustomIpMetadata(address ipId, Metadata.Attribute[] calldata metadata) internal {
         for (uint256 i = 0; i < metadata.length; i++) {
             metadataResolver.setValue(ipId, metadata[i].key, metadata[i].value);
         }
@@ -319,5 +315,4 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
         }
         return IStoryProtocolToken(tokenContract).mint(to, tokenMetadata);
     }
-
 }

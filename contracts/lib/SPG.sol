@@ -4,7 +4,6 @@ pragma solidity ^0.8.23;
 
 /// @notice Library for SPG collection management.
 library SPG {
-
     /// @notice SPG ERC-721 configuration settings to pass in to a collection.
     struct CollectionSettings {
         string name;
@@ -16,7 +15,7 @@ library SPG {
     /// @notice SPG ERC-721 collection types usable for new IP representation.
     /// TODO: Add other collection types (e.g. ERC721a / SeaDrop / etc.)
     enum CollectionType {
-        // The Story Protocol default ERC-721 collection - used when IP creators wish to tokenize 
+        // The Story Protocol default ERC-721 collection - used when IP creators wish to tokenize
         // a single IP without the complexity of launching an entire collection an entire collection.
         SP_DEFAULT_COLLECTION,
         RFU // Reserved for future use - used only for testing.
@@ -32,4 +31,3 @@ library SPG {
         uint256 end;
     }
 }
-

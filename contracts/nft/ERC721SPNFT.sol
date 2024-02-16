@@ -3,7 +3,6 @@ pragma solidity ^0.8.23;
 
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 import { IERC721MetadataProvider } from "..//interfaces/nft/IERC721MetadataProvider.sol";
 import { ERC721Cloneable } from "./ERC721Cloneable.sol";
@@ -139,7 +138,7 @@ contract ERC721SPNFT is ERC721Cloneable, Ownable2StepUpgradeable, ReentrancyGuar
     /// @param id The ERC-165 interface identifier.
     /// @return True if interface id `id` is supported, false otherwise.
     function supportsInterface(bytes4 id) public view virtual override(ERC721Cloneable) returns (bool) {
-        return 
+        return
             id == type(IStoryProtocolToken).interfaceId ||
             id == type(IERC721SPNFT).interfaceId ||
             super.supportsInterface(id);

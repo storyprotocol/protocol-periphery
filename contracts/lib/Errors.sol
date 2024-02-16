@@ -68,8 +68,7 @@ library Errors {
     ////////////////////////////////////////////////////////////////////////////
     //                         Story Protocol Gateway                         //
     ////////////////////////////////////////////////////////////////////////////
-//
-//
+
     /// @notice Minting has already completed for the targeted collection.
     error SPG__MintingAlreadyEnded();
 

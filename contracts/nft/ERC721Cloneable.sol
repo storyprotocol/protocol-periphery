@@ -75,7 +75,11 @@ abstract contract ERC721Cloneable is IERC721Metadata, Initializable {
     /// @param tokenId The id of the NFT being transferred.
     function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) external {
         transferFrom(from, to, tokenId);
-        if (to.code.length != 0 && IERC721Receiver(to).onERC721Received(msg.sender, from, tokenId, data) != IERC721Receiver.onERC721Received.selector) {
+        if (
+            to.code.length != 0 &&
+            IERC721Receiver(to).onERC721Received(msg.sender, from, tokenId, data) !=
+            IERC721Receiver.onERC721Received.selector
+        ) {
             revert Errors.ERC721__SafeTransferUnsupported();
         }
     }
@@ -88,7 +92,11 @@ abstract contract ERC721Cloneable is IERC721Metadata, Initializable {
     /// @param tokenId The id of the NFT being transferred.
     function safeTransferFrom(address from, address to, uint256 tokenId) external {
         transferFrom(from, to, tokenId);
-        if (to.code.length != 0 && IERC721Receiver(to).onERC721Received(msg.sender, from, tokenId, "") != IERC721Receiver.onERC721Received.selector) {
+        if (
+            to.code.length != 0 &&
+            IERC721Receiver(to).onERC721Received(msg.sender, from, tokenId, "") !=
+            IERC721Receiver.onERC721Received.selector
+        ) {
             revert Errors.ERC721__SafeTransferUnsupported();
         }
     }

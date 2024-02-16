@@ -11,7 +11,6 @@ import { Metadata } from "../lib/Metadata.sol";
 /// @notice Interface for the Story Protocol Gateway, used as the de facto entrypoint
 ///         for IP interactions in Story Protocol, particularly registrations.
 interface IStoryProtocolGateway is IStoryProtocolDrop, IModule {
-
     /// @notice Registers an existing NFT as into the protocol as an IP Asset.
     /// @param policyId The policy that will identify the licensing terms of the IP.
     /// @param tokenContract The address of the contract of the NFT being registered.
@@ -66,5 +65,4 @@ interface IStoryProtocolGateway is IStoryProtocolDrop, IModule {
         bytes calldata tokenMetadata,
         Metadata.IPMetadata calldata ipMetadata
     ) external returns (uint256 tokenId, address ipId);
-
 }

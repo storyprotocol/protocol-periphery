@@ -10,7 +10,6 @@ import { SPG } from "../lib/SPG.sol";
 /// @notice This interface must be followed for all NFTs whose mints are to be managed
 ///         directly using the Story Protocol periphery contracts.
 interface IStoryProtocolToken is IERC721Metadata {
-
     /// @notice Mints a new token, optionally providing additional metadata.
     /// @param to The address that will receive the minted NFT.
     /// @param data Bytes-encoded metadata that may be used for the new NFT.
@@ -19,8 +18,5 @@ interface IStoryProtocolToken is IERC721Metadata {
     /// @notice Configures the minting settings for an ongoing Story Protocol mint.
     /// @param spg The address of an allowed SPG contract given access to mint the token.
     /// @param mintSettings The new settings to configure for the mint.
-    function configureMint(
-        address spg,
-        SPG.MintSettings calldata mintSettings
-    ) external;
+    function configureMint(address spg, SPG.MintSettings calldata mintSettings) external;
 }

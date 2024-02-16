@@ -152,7 +152,7 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
         address tokenContract,
         uint256 tokenId,
         Metadata.IPMetadata calldata ipMetadata
-    ) external returns (address) {
+    ) external onlyAuthorized(tokenContract, tokenId) returns (address) {
         return _registerDerivativeIp(
             licenseIds,
             minRoyalty,
@@ -201,6 +201,9 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
             revert Errors.SPG__CollectionNotInitialized();
         }
         _mintSettings[msg.sender] = mintSettings;
+        if (mintSettings.start == 0) {
+            _mintSettings[msg.sender].start = block.timestamp;
+        }
     }
 
     /// @notice Gets the minting settings configured for a particular collection.
@@ -294,7 +297,6 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
             true,
             canonicalMetadata
         );
-        LICENSING_MODULE.linkIpToParents(licenseIds, ipId, minRoyalty);
         _setCustomIpMetadata(ipId, ipMetadata);
     }
 
@@ -304,7 +306,6 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
             metadataResolver.setValue(ipId, metadata[i].key, metadata[i].value);
         }
     }
-    
 
     /// @dev Mints an SPG-supported token on behalf of the user.
     /// TODO: Add various other programmable minting checks.
@@ -313,7 +314,7 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
         if (block.timestamp < mintSettings.start) {
             revert Errors.SPG__MintingNotYetStarted();
         }
-        if (block.timestamp > mintSettings.end) {
+        if (block.timestamp > mintSettings.end && mintSettings.end != 0) {
             revert Errors.SPG__MintingAlreadyEnded();
         }
         return IStoryProtocolToken(tokenContract).mint(to, tokenMetadata);

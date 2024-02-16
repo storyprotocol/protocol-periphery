@@ -59,6 +59,9 @@ library Errors {
     /// @notice The caller must be the SP NFT factory.
     error ERC721SPNFT__FactoryInvalid();
 
+    /// @notice The caller is not an approved owner of the collection.
+    error ERC721SPNFT__OwnerInvalid();
+
     /// @notice The caller is not an approved minter for the contract.
     error ERC721SPNFT__MinterInvalid();
 
@@ -66,9 +69,19 @@ library Errors {
     //                         Story Protocol Gateway                         //
     ////////////////////////////////////////////////////////////////////////////
 //
+//
+    /// @notice Minting has already completed for the targeted collection.
+    error SPG__MintingAlreadyEnded();
+
+    /// @notice The selected IP collection has yet to be initialized.
+    error SPG__CollectionNotInitialized();
+
     /// @notice The input IP NFT collection type is not supported.
     error SPG__CollectionTypeUnsupported();
 
     /// @notice The owner is not allowed to perform this registration.
     error SPG__InvalidOwner();
+
+    /// @notice Minting has yet to start for the targeted SPG.
+    error SPG__MintingNotYetStarted();
 }

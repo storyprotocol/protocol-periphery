@@ -2,6 +2,8 @@
 // See https://github.com/storyprotocol/protocol-contracts/blob/main/StoryProtocol-AlphaTestingAgreement-17942166.3.pdf
 pragma solidity ^0.8.23;
 
+import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import { IModule } from "@storyprotocol/contracts/interfaces/modules/base/IModule.sol";
 import { BaseModule } from "@storyprotocol/contracts/modules/BaseModule.sol";
@@ -10,7 +12,7 @@ import { ILicensingModule } from "@storyprotocol/contracts/interfaces/modules/li
 import { IP } from "@storyprotocol/contracts/lib/IP.sol";
 import { IPResolver } from "@storyprotocol/contracts/resolvers/IPResolver.sol";
 
-import { ERC721 } from "./lib/ERC721.sol";
+import { SPG } from "./lib/SPG.sol";
 import { Metadata } from "./lib/Metadata.sol";
 import { IStoryProtocolGateway } from "./interfaces/IStoryProtocolGateway.sol";
 import { IStoryProtocolToken } from "./interfaces/IStoryProtocolToken.sol";
@@ -37,6 +39,9 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
     /// @notice The current resolver to use for new record registration.
     IPResolver public metadataResolver;
 
+    /// Configured mint settings for every IP collection.
+    mapping(address => SPG.MintSettings) internal _mintSettings;
+
     /// @notice Restricts calls only to be made by an approved NFT owner.
     modifier onlyAuthorized(address tokenContract, uint256 tokenId) {
         address owner = IERC721(tokenContract).ownerOf(tokenId);
@@ -46,17 +51,23 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
         _;
     }
 
+    /// @notice Ensures the caller is a SPG-supported ERC-721 collection.
+    modifier onlyStoryProtocolToken() {
+        if (!IERC165(msg.sender).supportsInterface(type(IStoryProtocolToken).interfaceId)) {
+            revert Errors.SPG__CollectionTypeUnsupported();
+        }
+        _;
+    }
+
     /// @notice Initializes the Story Protocol Gateway contract.
     /// @param ipAssetRegistry The protocol-wide global IP asset registry.
     /// @param licensingModule The IP licensing module.
     /// @param resolver Default resolver to use for setting custom IP metadata.
-    /// @param spNFTImpl The default SP NFT impl contract for SP NFT mints.
     constructor(
         address ipAssetRegistry,
         address licensingModule,
-        address resolver,
-        address spNFTImpl
-    ) ERC721SPNFTFactory(spNFTImpl) {
+        address resolver
+    ) {
         IP_ASSET_REGISTRY = IPAssetRegistry(ipAssetRegistry);
         LICENSING_MODULE = ILicensingModule(licensingModule);
         metadataResolver = IPResolver(resolver);
@@ -65,16 +76,23 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
     /// @notice Creates a new Story Protocol NFT collection.
     /// @param collectionType The type of ERC-721 collection to initialize.
     /// @param collectionSettings Settings that apply to the collection as a whole.
+    /// @param mintSettings Settings that apply how the NFTs get minted.
     function createIpCollection(
-        ERC721.CollectionType collectionType,
-        ERC721.CollectionSettings calldata collectionSettings
+        SPG.CollectionType collectionType,
+        SPG.CollectionSettings calldata collectionSettings,
+        SPG.MintSettings calldata mintSettings
     ) external returns (address) {
-        if (collectionType == ERC721.CollectionType.SP_DEFAULT_COLLECTION) {
-            return _createSPNFTCollection(collectionSettings);
-        } else {
-            // TODO: Support new ERC721 collection types.
+        if (collectionType != SPG.CollectionType.SP_DEFAULT_COLLECTION) {
+            // TODO: Support other ERC721 collection types.
             revert Errors.SPG__CollectionTypeUnsupported();
         }
+        address ipCollection = _createSPNFTCollection(collectionSettings);
+        _mintSettings[ipCollection] = mintSettings;
+        // A default value of 0 indicates that minting can start immediately.
+        if (mintSettings.start == 0) {
+            _mintSettings[ipCollection].start = block.timestamp;
+        }
+        return ipCollection;
     }
 
 
@@ -110,7 +128,7 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
         bytes calldata tokenMetadata,
         Metadata.IPMetadata calldata ipMetadata
     ) external returns (uint256 tokenId, address ipId) {
-        tokenId = IStoryProtocolToken(tokenContract).mint(msg.sender, tokenMetadata);
+        tokenId = _mint(tokenContract, tokenMetadata, msg.sender);
         ipId = _registerIp(
             policyId,
             tokenContract,
@@ -162,7 +180,7 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
         bytes calldata tokenMetadata,
         Metadata.IPMetadata calldata ipMetadata
     ) external returns (uint256 tokenId, address ipId) {
-        tokenId = IStoryProtocolToken(tokenContract).mint(msg.sender, tokenMetadata);
+        tokenId = _mint(tokenContract, tokenMetadata, msg.sender);
         ipId = _registerDerivativeIp(
             licenseIds,
             minRoyalty,
@@ -178,10 +196,21 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
     /// @notice Configures the minting settings for an IP NFT collection.
     /// @param mintSettings The updated settings to configure for the mint.
     //// TODO: Add functionality for allowing owners to update collection mint settings.
-    function configureMint(SPG.MintSettings calldata mintSettings) external {}
+    function configureMintSettings(SPG.MintSettings calldata mintSettings) external onlyStoryProtocolToken {
+        if (_mintSettings[msg.sender].start == 0) {
+            revert Errors.SPG__CollectionNotInitialized();
+        }
+        _mintSettings[msg.sender] = mintSettings;
+    }
+
+    /// @notice Gets the minting settings configured for a particular collection.
+    /// @param ipCollection The collection whose mint settings are being queried for.
+    function getMintSettings(address ipCollection) external view returns (SPG.MintSettings memory) {
+        return _mintSettings[ipCollection];
+    }
 
     /// @notice Gets the name of the enrolled frontend as a module.
-    function name() external override(IModule) returns (string memory) {
+    function name() external override(IModule) pure returns (string memory) {
         return "SPG";
     }
 
@@ -275,4 +304,19 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
             metadataResolver.setValue(ipId, metadata[i].key, metadata[i].value);
         }
     }
+    
+
+    /// @dev Mints an SPG-supported token on behalf of the user.
+    /// TODO: Add various other programmable minting checks.
+    function _mint(address tokenContract, bytes calldata tokenMetadata, address to) internal returns (uint256) {
+        SPG.MintSettings memory mintSettings = _mintSettings[tokenContract];
+        if (block.timestamp < mintSettings.start) {
+            revert Errors.SPG__MintingNotYetStarted();
+        }
+        if (block.timestamp > mintSettings.end) {
+            revert Errors.SPG__MintingAlreadyEnded();
+        }
+        return IStoryProtocolToken(tokenContract).mint(to, tokenMetadata);
+    }
+
 }

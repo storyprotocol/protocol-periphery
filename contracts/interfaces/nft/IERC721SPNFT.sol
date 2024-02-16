@@ -7,7 +7,7 @@ import { IStoryProtocolToken } from "../IStoryProtocolToken.sol";
 /// @title ERC-721 Story Protocol NFT Interface
 /// @notice This ERC-721 contract interface allows every token to specify its own
 ///         set of custom metadata that conforms to the ERC-721 JSON standards.
-interface IERC721SPNFT is IERC721Metadata, IStoryProtocolToken {
+interface IERC721SPNFT is IStoryProtocolToken {
     /// @notice Mints a new SP NFT with the provided metadata.
     /// @param to The address that will receive the minted NFT.
     /// @param data Bytes-encoded metadata to use for the IP NFT.

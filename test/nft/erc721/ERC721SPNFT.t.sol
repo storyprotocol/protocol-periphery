@@ -6,7 +6,10 @@ import { ERC721SPNFT } from "contracts/nft/ERC721SPNFT.sol";
 import { ERC721BaseTest } from "test/nft/erc721/ERC721Base.t.sol";
 import { ERC721CloneableTest } from "test/nft/erc721/ERC721Cloneable.t.sol";
 import { Errors } from "contracts/lib/Errors.sol";
+import { IStoryProtocolDrop } from "contracts/interfaces/IStoryProtocolDrop.sol";
+import { SPG } from "contracts/lib/SPG.sol";
 import { MockERC721MetadataProvider } from "test/mocks/nft/MockERC721MetadataProvider.sol";
+import { MockStoryProtocolDrop } from "test/mocks/MockStoryProtocolDrop.sol";
 
 /// @title ERC721 SP NFT Test Contract
 contract ERC721SPNFTTest is ERC721BaseTest {
@@ -24,10 +27,11 @@ contract ERC721SPNFTTest is ERC721BaseTest {
     address owner = vm.addr(0x9999);
 
     /// @notice Mock placeholder for the SPG (initial NFT minter).
-    address spg = vm.addr(0x123);
+    address public spg;
 
-    /// @notice Mock placeholder for the SP NFT factory.
+    /// @notice Mock Story Protocol drops manager.
     address factory = vm.addr(0x69);
+
 
     /// @notice The ERC721 SP NFT SUT.
     ERC721SPNFT public spNFT;
@@ -36,7 +40,7 @@ contract ERC721SPNFTTest is ERC721BaseTest {
     MockERC721MetadataProvider public provider;
 
     /// @notice The maximum token supply to configure for the collection.
-    uint256 MAX_SUPPLY;
+    uint256 public constant MAX_SUPPLY = 3;
 
     /// Mock metadata to use for the ERC-721 SP NFT.
     string internal constant _NAME = "MOCK_NAME";
@@ -92,6 +96,19 @@ contract ERC721SPNFTTest is ERC721BaseTest {
         spNFT.mint(alice, "");
     }
 
+    /// @notice Tests that mints past the maximum supply revert.
+    function test_ERC721SPNFT_Mint_Reverts_MaxSupply() public {
+        vm.startPrank(spg);
+        MockERC721MetadataProvider.TokenMetadata memory metadata = MockERC721MetadataProvider.TokenMetadata({
+            url: MOCK_TOKEN_URI
+        });
+        spNFT.mint(alice, abi.encode(metadata));
+        spNFT.mint(alice, abi.encode(metadata));
+        spNFT.mint(alice, abi.encode(metadata));
+        vm.expectRevert(Errors.ERC721__MaxSupplyReached.selector);
+        spNFT.mint(alice, abi.encode(metadata));
+    }
+
     /// @notice Tests that mints with non-compliant metadata revert.
     /// TODO: Add better error-handling around abi-decoding issues.
     function test_ERC721SPNFT_Mint_Reverts_MetadataInvalid() public {
@@ -119,6 +136,34 @@ contract ERC721SPNFTTest is ERC721BaseTest {
         vm.expectRevert(Errors.ERC721__OwnerInvalid.selector);
         spNFT.burn(TEST_TOKEN);
     }
+
+    /// @notice Tests that minting settings can be configured.
+    function test_ERC721SPNFT_ConfigureMintSettings() public {
+        uint256 startTime = block.timestamp;
+        uint256 endTime = block.timestamp + 10000;
+        SPG.MintSettings memory mintSettings = SPG.MintSettings({
+            start: startTime,
+            end: endTime
+        });
+        vm.prank(owner);
+        spNFT.configureMintSettings(spg, mintSettings);
+        SPG.MintSettings memory spgMintSettings = IStoryProtocolDrop(spg).getMintSettings(address(spNFT));
+        assertEq(spgMintSettings.start, startTime);
+        assertEq(spgMintSettings.end, endTime);
+    }
+
+    /// @notice Tests that configuring minting settings on the SPG reverts if owner is invalid.
+    function test_ERC721SPNFT_ConfigureMintSettings_Reverts_Unauthorized() public {
+        uint256 startTime = block.timestamp;
+        uint256 endTime = block.timestamp + 10000;
+        SPG.MintSettings memory mintSettings = SPG.MintSettings({
+            start: startTime,
+            end: endTime
+        });
+        vm.expectRevert();
+        spNFT.configureMintSettings(spg, mintSettings);
+    }
+
 
     /// @notice Tests that setting new minters works.
     function test_ERC721SPNFT_SetMinter() public {
@@ -165,6 +210,7 @@ contract ERC721SPNFTTest is ERC721BaseTest {
         provider = new MockERC721MetadataProvider();
         vm.prank(owner);
         spNFT = new ERC721SPNFT(factory);
+        spg = address(new MockStoryProtocolDrop());
         vm.prank(factory);
         spNFT.initialize(
             owner,

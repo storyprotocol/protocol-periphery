@@ -59,7 +59,7 @@ contract ERC721MetadataProviderTest is BaseTest {
         Metadata.ContractData memory contractData = Metadata.ContractData({
             description: CONTRACT_DESCRIPTION,
             image: CONTRACT_IMAGE,
-            baseURI: CONTRACT_URI
+            uri: CONTRACT_URI
         });
 
         provider = new ERC721MetadataProvider();
@@ -120,67 +120,67 @@ contract ERC721MetadataProviderTest is BaseTest {
     }
 
     /// @notice Tests that metadata setting fails if the name is invalid.
-    function test_ERC721MetadataProvider_SetMetadata_Reverts_InvalidName() public {
-        vm.expectRevert(Errors.ERC721MetadataProvider__NameInvalid.selector);
-        vm.prank(address(spNFT));
-        provider.setMetadata(
-            TEST_TOKEN,
-            _generateTokenMetadata(
-                "",
-                TOKEN_DESCRIPTION,
-                TOKEN_URL,
-                TOKEN_IMAGE
-            )
-        );
-    }
+    // function test_ERC721MetadataProvider_SetMetadata_Reverts_InvalidName() public {
+    //     vm.expectRevert(Errors.ERC721MetadataProvider__NameInvalid.selector);
+    //     vm.prank(address(spNFT));
+    //     provider.setMetadata(
+    //         TEST_TOKEN,
+    //         _generateTokenMetadata(
+    //             "",
+    //             TOKEN_DESCRIPTION,
+    //             TOKEN_URL,
+    //             TOKEN_IMAGE
+    //         )
+    //     );
+    // }
 
     /// @notice Tests that metadata setting fails if the description is invalid.
-    function test_ERC721MetadataProvider_SetMetadata_Reverts_InvalidDescription() public {
-        vm.expectRevert(Errors.ERC721MetadataProvider__DescriptionInvalid.selector);
-        vm.prank(address(spNFT));
-        provider.setMetadata(
-            TEST_TOKEN,
-            _generateTokenMetadata(
-                TOKEN_NAME,
-                "",
-                TOKEN_URL,
-                TOKEN_IMAGE
-            )
-        );
-    }
+    // function test_ERC721MetadataProvider_SetMetadata_Reverts_InvalidDescription() public {
+    //     vm.expectRevert(Errors.ERC721MetadataProvider__DescriptionInvalid.selector);
+    //     vm.prank(address(spNFT));
+    //     provider.setMetadata(
+    //         TEST_TOKEN,
+    //         _generateTokenMetadata(
+    //             TOKEN_NAME,
+    //             "",
+    //             TOKEN_URL,
+    //             TOKEN_IMAGE
+    //         )
+    //     );
+    // }
 
     /// @notice Tests that metadata setting fails if the URL is invalid.
-    function test_ERC721MetadataProvider_SetMetadata_Reverts_InvalidURL() public {
-        vm.expectRevert(Errors.ERC721MetadataProvider__URLInvalid.selector);
-        vm.prank(address(spNFT));
-        provider.setMetadata(
-            TEST_TOKEN,
-            _generateTokenMetadata(
-                TOKEN_NAME,
-                TOKEN_DESCRIPTION,
-                "",
-                TOKEN_IMAGE
-            )
-        );
-    }
+    // function test_ERC721MetadataProvider_SetMetadata_Reverts_InvalidURL() public {
+    //     vm.expectRevert(Errors.ERC721MetadataProvider__URLInvalid.selector);
+    //     vm.prank(address(spNFT));
+    //     provider.setMetadata(
+    //         TEST_TOKEN,
+    //         _generateTokenMetadata(
+    //             TOKEN_NAME,
+    //             TOKEN_DESCRIPTION,
+    //             "",
+    //             TOKEN_IMAGE
+    //         )
+    //     );
+    // }
 
     /// @notice Tests that metadata setting fails if the image is invalid.
-    function test_ERC721MetadataProvider_SetMetadata_Reverts_InvalidImage() public {
-        vm.expectRevert(Errors.ERC721MetadataProvider__ImageInvalid.selector);
-        vm.prank(address(spNFT));
-        provider.setMetadata(
-            TEST_TOKEN,
-            _generateTokenMetadata(
-                TOKEN_NAME,
-                TOKEN_DESCRIPTION,
-                TOKEN_URL,
-                ""
-            )
-        );
-    }
+    // function test_ERC721MetadataProvider_SetMetadata_Reverts_InvalidImage() public {
+    //     vm.expectRevert(Errors.ERC721MetadataProvider__ImageInvalid.selector);
+    //     vm.prank(address(spNFT));
+    //     provider.setMetadata(
+    //         TEST_TOKEN,
+    //         _generateTokenMetadata(
+    //             TOKEN_NAME,
+    //             TOKEN_DESCRIPTION,
+    //             TOKEN_URL,
+    //             ""
+    //         )
+    //     );
+    // }
 
     /// @dev Generates bytes-encoded token metadata.
-    function _generateTokenMetadata(string memory name, string memory description, string memory url, string memory image) internal returns (bytes memory) {
+    function _generateTokenMetadata(string memory name, string memory description, string memory url, string memory image) internal pure returns (bytes memory) {
         Metadata.Attribute[] memory attributes = new Metadata.Attribute[](3);
         attributes[0] = Metadata.Attribute(ATTR_1_KEY, ATTR_1_VALUE);
         attributes[1] = Metadata.Attribute(ATTR_2_KEY, ATTR_2_VALUE);

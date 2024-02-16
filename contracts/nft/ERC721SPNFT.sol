@@ -23,7 +23,7 @@ contract ERC721SPNFT is ERC721Cloneable, Ownable2StepUpgradeable, ReentrancyGuar
     mapping(address => bool) public isMinter;
 
     /// @notice Tracks the max supply allowed for the collection.
-    uint256 maxSupply;
+    uint256 public maxSupply;
 
     /// @dev Gets the current metadata provider used for new NFTs in the collection.
     IERC721MetadataProvider internal _metadataProvider;
@@ -69,14 +69,14 @@ contract ERC721SPNFT is ERC721Cloneable, Ownable2StepUpgradeable, ReentrancyGuar
     /// @notice Mints a new SP NFT with the provided metadata.
     /// @param to The address that will receive the minted NFT.
     /// @param data Bytes-encoded metadata to use for the IP NFT.
-    function mint(address to, bytes memory data) external nonReentrant {
-        uint256 tokenId = totalSupply;
+    function mint(address to, bytes memory data) external nonReentrant returns (uint256 tokenId) {
         if (!isMinter[msg.sender]) {
             revert Errors.ERC721SPNFT__MinterInvalid();
         }
         if (totalSupply == maxSupply) {
             revert Errors.ERC721__MaxSupplyReached();
         }
+        tokenId = totalSupply;
         _mint(to, tokenId);
         _metadataProviders[tokenId] = _metadataProvider;
         _metadataProvider.setMetadata(tokenId, data);
@@ -109,11 +109,8 @@ contract ERC721SPNFT is ERC721Cloneable, Ownable2StepUpgradeable, ReentrancyGuar
     /// @notice Configures the minting settings for an ongoing Story Protocol mint.
     /// @param spg The address of an allowed SPG contract given access to mint the token.
     /// @param settings The new settings to configure for the mint.
-    function configureMint(address spg, SPG.MintSettings calldata settings) external onlyOwner {
-        if (!isMinter[spg]) {
-            revert Errors.ERC721SPNFT__MinterInvalid();
-        }
-        IStoryProtocolGateway(spg).configureMint(settings);
+    function configureMintSettings(address spg, SPG.MintSettings calldata settings) external onlyOwner {
+        IStoryProtocolGateway(spg).configureMintSettings(settings);
     }
 
     /// @notice Gets the metadata provider used for new NFT mints.

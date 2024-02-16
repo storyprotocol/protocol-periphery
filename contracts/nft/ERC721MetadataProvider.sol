@@ -31,7 +31,7 @@ contract ERC721MetadataProvider is IERC721MetadataProvider, Initializable {
         Metadata.ContractData memory decoded = abi.decode(data, (Metadata.ContractData));
         _contractMetadata.description = decoded.description;
         _contractMetadata.image = decoded.image;
-        _contractMetadata.baseURI = decoded.baseURI;
+        _contractMetadata.uri = decoded.uri;
         _spNFT = IERC721SPNFT(tokenAddr);
     }
 
@@ -131,7 +131,7 @@ contract ERC721MetadataProvider is IERC721MetadataProvider, Initializable {
                 '{"description": "',
                 contractMetadata.description,
                 '", "external_link": "',
-                contractMetadata.baseURI,
+                contractMetadata.uri,
                 '", "image": "',
                 contractMetadata.image,
                 '", "name": "',

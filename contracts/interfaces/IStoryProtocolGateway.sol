@@ -2,24 +2,15 @@
 // See https://github.com/storyprotocol/protocol-contracts/blob/main/StoryProtocol-AlphaTestingAgreement-17942166.3.pdf
 pragma solidity ^0.8.23;
 
-import { ERC721 } from "../lib/ERC721.sol";
-import { Metadata } from "../lib/Metadata.sol";
 import { IModule } from "@storyprotocol/contracts/interfaces/modules/base/IModule.sol";
-import { SPG } from "../lib/SPG.sol";
+
+import { IStoryProtocolDrop } from "./IStoryProtocolDrop.sol";
+import { Metadata } from "../lib/Metadata.sol";
 
 /// @title Story Protocol Gateway Interface
 /// @notice Interface for the Story Protocol Gateway, used as the de facto entrypoint
 ///         for IP interactions in Story Protocol, particularly registrations.
-interface IStoryProtocolGateway is IModule {
-
-    /// @notice Creates a new Story Protocol NFT collection.
-    /// @param collectionType The type of ERC-721 collection to initialize.
-    /// @param collectionSettings Settings that apply to the collection as a whole.
-    /// @return The address of the newly deployed IP NFT collection.
-    function createIpCollection(
-        ERC721.CollectionType collectionType,
-        ERC721.CollectionSettings calldata collectionSettings
-    ) external returns (address);
+interface IStoryProtocolGateway is IStoryProtocolDrop, IModule {
 
     /// @notice Registers an existing NFT as into the protocol as an IP Asset.
     /// @param policyId The policy that will identify the licensing terms of the IP.
@@ -76,7 +67,4 @@ interface IStoryProtocolGateway is IModule {
         Metadata.IPMetadata calldata ipMetadata
     ) external returns (uint256 tokenId, address ipId);
 
-    /// @notice Configures the minting settings for an IP NFT collection.
-    /// @param mintSettings The updated settings to configure for the mint.
-    function configureMint(SPG.MintSettings calldata mintSettings) external;
 }

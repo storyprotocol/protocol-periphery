@@ -9,7 +9,7 @@ library Metadata {
     struct ContractData {
         string description;
         string image;
-        string baseURI;
+        string uri;
     }
 
     /// @notice Describes a custom string key-value pair attribute.

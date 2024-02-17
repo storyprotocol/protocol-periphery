@@ -2,19 +2,16 @@
 pragma solidity ^0.8.23;
 
 import { IERC721Metadata } from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+import { IStoryProtocolToken } from "../IStoryProtocolToken.sol";
 
 /// @title ERC-721 Story Protocol NFT Interface
 /// @notice This ERC-721 contract interface allows every token to specify its own
 ///         set of custom metadata that conforms to the ERC-721 JSON standards.
-interface IERC721SPNFT is IERC721Metadata {
+interface IERC721SPNFT is IStoryProtocolToken {
     /// @notice Mints a new SP NFT with the provided metadata.
     /// @param to The address that will receive the minted NFT.
     /// @param data Bytes-encoded metadata to use for the IP NFT.
-    function mint(address to, bytes memory data) external;
-
-    /// @notice Burns a token owned by the calling address.
-    /// @param tokenId The ERC-721 identifier of the token being burned.
-    function burn(uint256 tokenId) external;
+    function mint(address to, bytes memory data) external override returns (uint256);
 
     /// @notice Gets the metadata provider used for new NFT mints.
     function metadataProvider() external view returns (address);

@@ -9,7 +9,7 @@ library Metadata {
     struct ContractData {
         string description;
         string image;
-        string baseURI;
+        string uri;
     }
 
     /// @notice Describes a custom string key-value pair attribute.
@@ -18,8 +18,16 @@ library Metadata {
         string value;
     }
 
+    /// @notice Attributes related to IP metadata.
+    struct IPMetadata {
+        string name;
+        bytes32 hash;
+        string url;
+        Attribute[] customMetadata;
+    }
+
     /// @notice Attributes related to token-specific ERC-721 metadata.
-    struct TokenData {
+    struct TokenMetadata {
         string name;
         string description;
         string externalUrl;

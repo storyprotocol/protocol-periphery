@@ -4,6 +4,8 @@ out/
 artifacts/
 forge-cache/
 
+package-lock.json
+
 # Ignores development broadcast logs
 # !/broadcast
 deployments

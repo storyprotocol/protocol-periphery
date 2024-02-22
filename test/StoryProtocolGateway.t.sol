@@ -93,7 +93,7 @@ contract StoryProtocolGatewayTest is ForkTest {
             commercializerChecker: address(0),
             commercializerCheckerData: "",
             commercialRevShare: 0,
-            derivativesAllowed: false,
+            derivativesAllowed: true,
             derivativesAttribution: false,
             derivativesApproval: false,
             derivativesReciprocal: false,

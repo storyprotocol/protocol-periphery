@@ -38,13 +38,13 @@ interface IStoryProtocolGateway is IStoryProtocolDrop, IModule {
 
     /// @notice Registers an existing NFT into the protocol as an IP asset derivative.
     /// @param licenseIds The licenses to incorporate for the new IP.
-    /// @param minRoyalty The minimum royalty % to be collected by the IP asset.
+    /// @param royaltyContext The bytes-encoded context for royalty policy to process.
     /// @param tokenContract The address of the contract of the NFT being registered.
     /// @param tokenId The id of the NFT being registered.
     /// @param ipMetadata Metadata related to IP attribution.
     function registerDerivativeIp(
         uint256[] calldata licenseIds,
-        uint32 minRoyalty,
+        bytes calldata royaltyContext,
         address tokenContract,
         uint256 tokenId,
         Metadata.IPMetadata calldata ipMetadata
@@ -52,7 +52,7 @@ interface IStoryProtocolGateway is IStoryProtocolDrop, IModule {
 
     /// @notice Registers an existing NFT into the protocol as an IP asset derivative.
     /// @param licenseIds The licenses to incorporate for the new IP.
-    /// @param minRoyalty The minimum royalty % to be collected by the IP asset.
+    /// @param royaltyContext The bytes-encoded context for royalty policy to process.
     /// @param tokenContract The address of the NFT being minted.
     /// @param tokenMetadata Token metadata in bytes to include for NFT minting.
     /// @param ipMetadata Metadata related to IP attribution.
@@ -60,7 +60,7 @@ interface IStoryProtocolGateway is IStoryProtocolDrop, IModule {
     /// @return ipId The address identifier of the newly registered IP asset.
     function mintAndRegisterDerivativeIp(
         uint256[] calldata licenseIds,
-        uint32 minRoyalty,
+        bytes calldata royaltyContext,
         address tokenContract,
         bytes calldata tokenMetadata,
         Metadata.IPMetadata calldata ipMetadata

@@ -3,7 +3,7 @@ pragma solidity ^0.8.23;
 
 import { IERC165 } from "@openzeppelin/contracts/interfaces/IERC165.sol";
 
-struct UMLPolicy {
+struct PILPolicy {
     bool transferable;
     bool attribution;
     bool commercialUse;
@@ -21,7 +21,7 @@ struct UMLPolicy {
     address royaltyPolicy;
 }
 
-struct UMLAggregator {
+struct PILAggregator {
     bool commercial;
     bool derivatives;
     bool derivativesReciprocal;
@@ -31,8 +31,7 @@ struct UMLAggregator {
     bytes32 contentRestrictionsAcc;
 }
 
-interface IUMLPolicyFrameworkManager is IERC165 {
-
+interface IPILPolicyFrameworkManager is IERC165 {
     struct VerifyLinkResponse {
         bool isLinkingAllowed;
         bool isRoyaltyRequired;
@@ -40,13 +39,13 @@ interface IUMLPolicyFrameworkManager is IERC165 {
         uint32 royaltyDerivativeRevShare;
     }
 
-    function registerPolicy(UMLPolicy calldata umlPolicy) external returns (uint256 policyId);
+    function registerPolicy(PILPolicy calldata pilPolicy) external returns (uint256 policyId);
 
-    function getPolicy(uint256 policyId) external view returns (UMLPolicy memory policy);
+    function getPolicy(uint256 policyId) external view returns (PILPolicy memory policy);
 
-    function getPolicyId(UMLPolicy calldata umlPolicy) external view returns (uint256 policyId);
+    function getPolicyId(PILPolicy calldata pilPolicy) external view returns (uint256 policyId);
 
-    function getAggregator(address ipId) external view returns (UMLAggregator memory rights);
+    function getAggregator(address ipId) external view returns (PILAggregator memory rights);
 
     function name() external view returns (string memory);
 

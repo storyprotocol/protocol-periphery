@@ -6,6 +6,7 @@ import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol
 import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import { IModule } from "@storyprotocol/contracts/interfaces/modules/base/IModule.sol";
+import { PILPolicy, PILPolicyFrameworkManager, RegisterPILPolicyParams } from "@storyprotocol/contracts/modules/licensing/PILPolicyFrameworkManager.sol";
 import { BaseModule } from "@storyprotocol/contracts/modules/BaseModule.sol";
 import { IPAssetRegistry } from "@storyprotocol/contracts/registries/IPAssetRegistry.sol";
 import { ILicensingModule } from "@storyprotocol/contracts/interfaces/modules/licensing/ILicensingModule.sol";
@@ -29,11 +30,16 @@ import { SPG } from "./lib/SPG.sol";
 ///    only supports public mints using SP NFTs for mint-and-register functions.
 ///  - Add support for minting and IP registration fees based on the collection.
 contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolGateway {
+    string public constant override name = "SPG";
+
     /// @notice The module used for licensing.
     ILicensingModule public immutable LICENSING_MODULE;
 
     /// @notice The global protocol-wide IP asset registry.
     IPAssetRegistry public immutable IP_ASSET_REGISTRY;
+
+    /// @notice The canonical PIL Policy Framework Manager.
+    PILPolicyFrameworkManager public immutable PIL_POLICY_FRAMEWORK_MANAGER;
 
     /// @notice The current resolver to use for new record registration.
     IPResolver public metadataResolver;
@@ -61,10 +67,12 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
     /// @notice Initializes the Story Protocol Gateway contract.
     /// @param ipAssetRegistry The protocol-wide global IP asset registry.
     /// @param licensingModule The IP licensing module.
+    /// @param pilPolicyFrameworkManager The canonical PIL Policy Framework Manager.
     /// @param resolver Default resolver to use for setting custom IP metadata.
-    constructor(address ipAssetRegistry, address licensingModule, address resolver) {
+    constructor(address ipAssetRegistry, address licensingModule, address pilPolicyFrameworkManager, address resolver) {
         IP_ASSET_REGISTRY = IPAssetRegistry(ipAssetRegistry);
         LICENSING_MODULE = ILicensingModule(licensingModule);
+        PIL_POLICY_FRAMEWORK_MANAGER = PILPolicyFrameworkManager(pilPolicyFrameworkManager);
         metadataResolver = IPResolver(resolver);
     }
 
@@ -137,13 +145,13 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
 
     /// @notice Registers an existing NFT into the protocol as an IP asset derivative.
     /// @param licenseIds The licenses to incorporate for the new IP.
-    /// @param minRoyalty The minimum royalty % to be collected by the IP asset.
+    /// @param royaltyContext The bytes-encoded context for royalty policy to process.
     /// @param tokenContract The address of the NFT bound to the root-level IP.
     /// @param tokenId The token id of the NFT bound to the root-level IP.
     /// @param ipMetadata Metadata related to IP attribution.
     function registerDerivativeIp(
         uint256[] calldata licenseIds,
-        uint32 minRoyalty,
+        bytes calldata royaltyContext,
         address tokenContract,
         uint256 tokenId,
         Metadata.IPMetadata calldata ipMetadata
@@ -151,7 +159,7 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
         return
             _registerDerivativeIp(
                 licenseIds,
-                minRoyalty,
+                royaltyContext,
                 tokenContract,
                 tokenId,
                 ipMetadata.name,
@@ -163,7 +171,7 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
 
     /// @notice Mints and registers a Story Protocol NFT into the protocol as an IP asset derivative.
     /// @param licenseIds The licenses to incorporate for the new IP.
-    /// @param minRoyalty The minimum royalty % to be collected by the IP asset.
+    /// @param royaltyContext The bytes-encoded context for royalty policy to process.
     /// @param tokenContract The address of the NFT bound to the root-level IP.
     /// @param tokenMetadata Token metadata in bytes to include for NFT minting.
     /// @param ipMetadata Metadata related to IP attribution.
@@ -171,7 +179,7 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
     /// @return ipId The address identifier of the newly registered IP asset.
     function mintAndRegisterDerivativeIp(
         uint256[] calldata licenseIds,
-        uint32 minRoyalty,
+        bytes calldata royaltyContext,
         address tokenContract,
         bytes calldata tokenMetadata,
         Metadata.IPMetadata calldata ipMetadata
@@ -179,7 +187,7 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
         tokenId = _mint(tokenContract, tokenMetadata, msg.sender);
         ipId = _registerDerivativeIp(
             licenseIds,
-            minRoyalty,
+            royaltyContext,
             tokenContract,
             tokenId,
             ipMetadata.name,
@@ -187,6 +195,129 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
             ipMetadata.url,
             ipMetadata.customMetadata
         );
+    }
+
+    // TODO: Implement the function once `IPolicyFrameworkManager` has `registerPolicy` function exposed.
+    // function createPolicy(address policyFrameworkManager, bytes memory policyData) external returns (uint256 policyId) {
+    //     policyId = IPolicyFrameworkManager(policyFrameworkManager).registerPolicy(policyData);
+    // }
+
+    /// @notice Create a new policy to Licensing Module via the PIL Policy Framework Manager.
+    /// @param pilPolicy The PIL policy to add to the Licensing Module.
+    /// @param transferable Whether or not the license is transferable.
+    /// @param royaltyPolicy Address of a royalty policy contract (e.g. RoyaltyPolicyLAP) that will handle royalty payments.
+    /// @param mintingFee Fee to be paid when minting a license.
+    /// @param mintingFeeToken Token to be used to pay the minting fee.
+    /// @return policyId The ID of the newly registered policy.
+    function createPolicyPIL(
+        PILPolicy memory pilPolicy,
+        bool transferable,
+        address royaltyPolicy,
+        uint256 mintingFee,
+        address mintingFeeToken
+    ) external returns (uint256 policyId) {
+        policyId = PIL_POLICY_FRAMEWORK_MANAGER.registerPolicy(
+            RegisterPILPolicyParams({
+                transferable: transferable,
+                royaltyPolicy: royaltyPolicy,
+                mintingFee: mintingFee,
+                mintingFeeToken: mintingFeeToken,
+                policy: pilPolicy
+            })
+        );
+    }
+
+    /// @notice Add a PIL policy to an IPAsset. Create a new PIL policy if it doesn't exist.
+    /// @param pilPolicy The PIL policy to add to the Licensing Module.
+    /// @param transferable Whether or not the license is transferable.
+    /// @param royaltyPolicy Address of a royalty policy contract (e.g. RoyaltyPolicyLAP) that will handle royalty payments.
+    /// @param mintingFee Fee to be paid when minting a license.
+    /// @param mintingFeeToken Token to be used to pay the minting fee.
+    /// @param ipId The address of the IP asset to add the policy to.
+    /// @return policyGlobalId The ID of the newly (or existing) registered policy.
+    /// @return policyIndexOnIpId The index of the policy on the IP asset.
+    function addPILPolicyToIp(
+        PILPolicy memory pilPolicy,
+        bool transferable,
+        address royaltyPolicy,
+        uint256 mintingFee,
+        address mintingFeeToken,
+        address ipId
+    ) external returns (uint256 policyGlobalId, uint256 policyIndexOnIpId) {
+        policyGlobalId = PIL_POLICY_FRAMEWORK_MANAGER.registerPolicy(
+            RegisterPILPolicyParams({
+                transferable: transferable,
+                royaltyPolicy: royaltyPolicy,
+                mintingFee: mintingFee,
+                mintingFeeToken: mintingFeeToken,
+                policy: pilPolicy
+            })
+        );
+        policyIndexOnIpId = LICENSING_MODULE.addPolicyToIp(ipId, policyGlobalId);
+    }
+
+    /// @notice Mint a license for an IP asset.
+    /// @param policyId The ID of the policy that will identify the licensing terms of the IP.
+    /// @param licensorIpId The address of the IP asset being licensed.
+    /// @param amount The amount of licenses to mint.
+    /// @param royaltyContext The bytes-encoded context for royalty policy to process.
+    /// @return licenseId The ID of the minted license NFT.
+    function mintLicense(
+        uint256 policyId,
+        address licensorIpId,
+        uint256 amount,
+        bytes memory royaltyContext
+    ) external returns (uint256 licenseId) {
+        licenseId = LICENSING_MODULE.mintLicense(policyId, licensorIpId, amount, msg.sender, royaltyContext);
+    }
+
+    /// @notice Mint a license for an IP asset.
+    /// @param policyId The ID of the policy that will identify the licensing terms of the IP.
+    /// @param licensorTokenContract The address of the contract of the NFT being licensed.
+    /// @param licensorTokenId The id of the NFT being licensed.
+    /// @param amount The amount of licenses to mint.
+    /// @param royaltyContext The bytes-encoded context for royalty policy to process.
+    /// @return licenseId The ID of the minted license NFT.
+    function mintLicense(
+        uint256 policyId,
+        address licensorTokenContract,
+        uint256 licensorTokenId,
+        uint256 amount,
+        bytes memory royaltyContext
+    ) external returns (uint256 licenseId) {
+        licenseId = _mintLicense(policyId, licensorTokenContract, licensorTokenId, amount, royaltyContext);
+    }
+
+    /// @notice Mint a license for an IP asset using the PIL Policy Framework Manager.
+    /// @param pilPolicy The PIL policy to use or add to the Licensing Module.
+    /// @param licensorIpId The address of the IP asset being licensed.
+    /// @param amount The amount of licenses to mint.
+    /// @param royaltyContext The bytes-encoded context for royalty policy to process.
+    /// @param transferable Whether or not the license is transferable.
+    /// @param royaltyPolicy Address of a royalty policy contract (e.g. RoyaltyPolicyLAP) that will handle royalty payments.
+    /// @param mintingFee Fee to be paid when minting a license.
+    /// @param mintingFeeToken Token to be used to pay the minting fee.
+    /// @return licenseId The ID of the minted license NFT.
+    function mintLicensePIL(
+        PILPolicy memory pilPolicy,
+        address licensorIpId,
+        uint256 amount,
+        bytes memory royaltyContext,
+        bool transferable,
+        address royaltyPolicy,
+        uint256 mintingFee,
+        address mintingFeeToken
+    ) external returns (uint256 licenseId) {
+        uint256 policyId = PIL_POLICY_FRAMEWORK_MANAGER.registerPolicy(
+            RegisterPILPolicyParams({
+                transferable: transferable,
+                royaltyPolicy: royaltyPolicy,
+                mintingFee: mintingFee,
+                mintingFeeToken: mintingFeeToken,
+                policy: pilPolicy
+            })
+        );
+        licenseId = LICENSING_MODULE.mintLicense(policyId, licensorIpId, amount, msg.sender, royaltyContext);
     }
 
     /// @notice Configures the minting settings for an IP NFT collection.
@@ -206,11 +337,6 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
     /// @param ipCollection The collection whose mint settings are being queried for.
     function getMintSettings(address ipCollection) external view returns (SPG.MintSettings memory) {
         return _mintSettings[ipCollection];
-    }
-
-    /// @notice Gets the name of the enrolled frontend as a module.
-    function name() external pure override(IModule) returns (string memory) {
-        return "SPG";
     }
 
     /// @dev Registers an NFT into the protocol as a new IP asset.
@@ -256,7 +382,7 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
 
     /// @dev Registers an existing NFT into the protocol as an IP Asset derivative.
     /// @param licenseIds The parent IP asset licenses used to derive the new IP asset.
-    /// @param minRoyalty The minimum royalty to enforce if applicable, else 0.
+    /// @param royaltyContext The bytes-encoded context for royalty policy to process.
     /// @param tokenContract The address of the contract of the NFT being registered.
     /// @param tokenId The id of the NFT being registered.
     /// @param ipName The name assigned to the IP on registration.
@@ -265,7 +391,7 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
     /// @param ipMetadata Additioanl metadata string key-value pairs to assign to the IP.
     function _registerDerivativeIp(
         uint256[] memory licenseIds,
-        uint32 minRoyalty,
+        bytes memory royaltyContext,
         address tokenContract,
         uint256 tokenId,
         string memory ipName,
@@ -285,7 +411,7 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
 
         ipId = IP_ASSET_REGISTRY.register(
             licenseIds,
-            minRoyalty,
+            royaltyContext,
             block.chainid,
             tokenContract,
             tokenId,
@@ -314,5 +440,17 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
             revert Errors.SPG__MintingAlreadyEnded();
         }
         return IStoryProtocolToken(tokenContract).mint(to, tokenMetadata);
+    }
+
+    /// @dev Mint license
+    function _mintLicense(
+        uint256 policyId,
+        address licensorTokenContract,
+        uint256 licensorTokenId,
+        uint256 amount,
+        bytes memory royaltyContext
+    ) internal returns (uint256 licenseId) {
+        address licensorIpId = IP_ASSET_REGISTRY.ipId(block.chainid, licensorTokenContract, licensorTokenId);
+        licenseId = LICENSING_MODULE.mintLicense(policyId, licensorIpId, amount, msg.sender, royaltyContext);
     }
 }

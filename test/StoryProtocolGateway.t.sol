@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
+import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+
 import { IPAssetRegistry } from "@storyprotocol/contracts/registries/IPAssetRegistry.sol";
 import { LicensingModule } from "@storyprotocol/contracts/modules/licensing/LicensingModule.sol";
 import { ILicensingModule } from "@storyprotocol/contracts/interfaces/modules/licensing/ILicensingModule.sol";
 import { IRoyaltyPolicyLAP } from "@storyprotocol/contracts/interfaces/modules/royalty/policies/IRoyaltyPolicyLAP.sol";
 import { AccessPermission } from "@storyprotocol/contracts/lib/AccessPermission.sol";
+import { MetaTx } from "@storyprotocol/contracts/lib/MetaTx.sol";
 import { ModuleRegistry } from "@storyprotocol/contracts/registries/ModuleRegistry.sol";
 import { PILPolicy, IPILPolicyFrameworkManager, RegisterPILPolicyParams } from "@storyprotocol/contracts/interfaces/modules/licensing/IPILPolicyFrameworkManager.sol";
 import { IP } from "@storyprotocol/contracts/lib/IP.sol";
@@ -114,6 +117,7 @@ contract StoryProtocolGatewayTest is ForkTest {
         );
 
         spg = new StoryProtocolGateway(
+            accessControllerAddr,
             ipAssetRegistryAddr,
             licensingModuleAddr,
             pilPolicyFrameworkManagerAddr,
@@ -128,7 +132,7 @@ contract StoryProtocolGatewayTest is ForkTest {
             address(spg),
             address(licensingModule),
             ILicensingModule.addPolicyToIp.selector,
-            AccessPermission.ALLOW
+            AccessPermission.DENY
         );
 
         vm.prank(GOVERNANCE_ADMIN);
@@ -144,7 +148,7 @@ contract StoryProtocolGatewayTest is ForkTest {
             address(spg),
             address(ipResolver),
             KeyValueResolver.setValue.selector,
-            AccessPermission.ALLOW
+            AccessPermission.DENY
         );
 
         vm.prank(alice);
@@ -236,6 +240,21 @@ contract StoryProtocolGatewayTest is ForkTest {
 
     /// @notice Tests that registration and remixing of an existing NFT works.
     function test_SPG_RegisterIp() public {
+        vm.prank(GOVERNANCE_ADMIN);
+        accessController.setGlobalPermission(
+            address(spg),
+            address(licensingModule),
+            ILicensingModule.addPolicyToIp.selector,
+            AccessPermission.ALLOW
+        );
+
+        vm.prank(GOVERNANCE_ADMIN);
+        accessController.setGlobalPermission(
+            address(spg),
+            address(ipResolver),
+            KeyValueResolver.setValue.selector,
+            AccessPermission.ALLOW
+        );
         Metadata.Attribute[] memory customIpMetadata = new Metadata.Attribute[](1);
         customIpMetadata[0] = Metadata.Attribute(IP_CUSTOM_METADATA_KEY, IP_CUSTOM_METADATA_VALUE);
 
@@ -257,6 +276,120 @@ contract StoryProtocolGatewayTest is ForkTest {
         assertTrue(ipAssetRegistry.isRegistered(derivativeIpId));
     }
 
+    /// @notice Tests that registration and remixing of an existing NFT works.
+    function test_SPG_RegisterIpWithSig() public {
+        Metadata.Attribute[] memory customIpMetadata = new Metadata.Attribute[](1);
+        customIpMetadata[0] = Metadata.Attribute(IP_CUSTOM_METADATA_KEY, IP_CUSTOM_METADATA_VALUE);
+
+        Metadata.IPMetadata memory ipMetadata = Metadata.IPMetadata({
+            name: IP_METADATA_NAME,
+            hash: IP_METADATA_HASH,
+            url: IP_METADATA_URL,
+            customMetadata: customIpMetadata
+        });
+
+        address ipId = IPAssetRegistry(ipAssetRegistryAddr).ipId(block.chainid, address(externalNFT), 0);
+
+        uint deadline = block.timestamp + 1000;
+        AccessPermission.Permission[] memory permissionList = new AccessPermission.Permission[](2);
+        permissionList[0] = AccessPermission.Permission({
+            ipAccount: ipId,
+            signer: address(spg),
+            to: licensingModuleAddr,
+            func: bytes4(0),
+            permission: AccessPermission.ALLOW
+        });
+        permissionList[1] = AccessPermission.Permission({
+            ipAccount: ipId,
+            signer: address(spg),
+            to: ipResolverAddr,
+            func: bytes4(0),
+            permission: AccessPermission.ALLOW
+        });
+        bytes32 digest = MessageHashUtils.toTypedDataHash(
+            MetaTx.calculateDomainSeparator(ipId),
+            MetaTx.getExecuteStructHash(
+                MetaTx.Execute({
+                    to: accessControllerAddr,
+                    value: 0,
+                    data: abi.encodeWithSignature(
+                        "setBatchPermissions((address,address,address,bytes4,uint8)[])",
+                        permissionList
+                    ),
+                    nonce: 1,
+                    deadline: deadline
+                })
+            )
+        );
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(alicePk, digest);
+        bytes memory signature = abi.encodePacked(r, s, v);
+
+        vm.prank(alice);
+        ipId = spg.registerIpWithSig(
+            policyId,
+            address(externalNFT),
+            0,
+            ipMetadata,
+            SPG.Signature({ signer: alice, deadline: deadline, signature: signature })
+        );
+        assertTrue(ipAssetRegistry.isRegistered(ipId));
+        assertTrue(ipId.code.length > 0);
+        _registerDerivativeIpWithSig(ipId, ipMetadata);
+    }
+
+    function _registerDerivativeIpWithSig(address ipId, Metadata.IPMetadata memory ipMetadata) internal {
+        address derivativeIpId = IPAssetRegistry(ipAssetRegistryAddr).ipId(block.chainid, address(externalNFT), 1);
+
+        uint deadline = block.timestamp + 1000;
+        AccessPermission.Permission[] memory permissionList = new AccessPermission.Permission[](2);
+        permissionList[0] = AccessPermission.Permission({
+            ipAccount: derivativeIpId,
+            signer: address(spg),
+            to: licensingModuleAddr,
+            func: bytes4(0),
+            permission: AccessPermission.ALLOW
+        });
+        permissionList[1] = AccessPermission.Permission({
+            ipAccount: derivativeIpId,
+            signer: address(spg),
+            to: ipResolverAddr,
+            func: bytes4(0),
+            permission: AccessPermission.ALLOW
+        });
+        bytes32 digest = MessageHashUtils.toTypedDataHash(
+            MetaTx.calculateDomainSeparator(derivativeIpId),
+            MetaTx.getExecuteStructHash(
+                MetaTx.Execute({
+                    to: accessControllerAddr,
+                    value: 0,
+                    data: abi.encodeWithSignature(
+                        "setBatchPermissions((address,address,address,bytes4,uint8)[])",
+                        permissionList
+                    ),
+                    nonce: 1,
+                    deadline: deadline
+                })
+            )
+        );
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
+        bytes memory signature = abi.encodePacked(r, s, v);
+
+        uint256[] memory licenses = new uint256[](1);
+        licenses[0] = licensingModule.mintLicense(policyId, ipId, 1, bob, emptyRoyaltyPolicyLAPInitParams);
+        vm.prank(bob);
+        derivativeIpId = spg.registerDerivativeIpWithSig(
+            licenses,
+            "",
+            address(externalNFT),
+            1,
+            ipMetadata,
+            SPG.Signature({ signer: bob, deadline: deadline, signature: signature })
+        );
+        assertTrue(ipAssetRegistry.isRegistered(derivativeIpId));
+    }
+
     /// @notice Tests that registrations of IP by non-owners revert.
     function test_SPG_RegisterIp_Reverts_InvalidOwner() public {
         Metadata.Attribute[] memory customIpMetadata = new Metadata.Attribute[](1);
@@ -274,6 +407,21 @@ contract StoryProtocolGatewayTest is ForkTest {
 
     /// @notice Tests that registering NFTs minted from the default collection works.
     function test_SPG_MintAndRegisterIp() public {
+        vm.prank(GOVERNANCE_ADMIN);
+        accessController.setGlobalPermission(
+            address(spg),
+            address(licensingModule),
+            ILicensingModule.addPolicyToIp.selector,
+            AccessPermission.ALLOW
+        );
+
+        vm.prank(GOVERNANCE_ADMIN);
+        accessController.setGlobalPermission(
+            address(spg),
+            address(ipResolver),
+            KeyValueResolver.setValue.selector,
+            AccessPermission.ALLOW
+        );
         Metadata.Attribute[] memory customIpMetadata = new Metadata.Attribute[](1);
         customIpMetadata[0] = Metadata.Attribute(IP_CUSTOM_METADATA_KEY, IP_CUSTOM_METADATA_VALUE);
 
@@ -310,6 +458,134 @@ contract StoryProtocolGatewayTest is ForkTest {
             address(nft),
             tokenMetadata,
             ipMetadata
+        );
+        assertTrue(ipAssetRegistry.isRegistered(derivativeIpId));
+    }
+
+    function test_SPG_MintAndRegisterIpWithSig() public {
+        Metadata.Attribute[] memory customIpMetadata = new Metadata.Attribute[](1);
+        customIpMetadata[0] = Metadata.Attribute(IP_CUSTOM_METADATA_KEY, IP_CUSTOM_METADATA_VALUE);
+
+        Metadata.IPMetadata memory ipMetadata = Metadata.IPMetadata({
+            name: IP_METADATA_NAME,
+            hash: IP_METADATA_HASH,
+            url: IP_METADATA_URL,
+            customMetadata: customIpMetadata
+        });
+
+        Metadata.Attribute[] memory customTokenMetadata = new Metadata.Attribute[](1);
+        customTokenMetadata[0] = Metadata.Attribute(TOKEN_CUSTOM_METADATA_KEY, TOKEN_CUSTOM_METADATA_VALUE);
+        bytes memory tokenMetadata = abi.encode(
+            Metadata.TokenMetadata({
+                name: TOKEN_METADATA_NAME,
+                description: TOKEN_METADATA_DESCRIPTION,
+                externalUrl: TOKEN_METADATA_URL,
+                image: TOKEN_METADATA_IMAGE,
+                attributes: customTokenMetadata
+            })
+        );
+
+        address ipId = IPAssetRegistry(ipAssetRegistryAddr).ipId(block.chainid, address(nft), nft.totalSupply());
+
+        AccessPermission.Permission[] memory permissionList = new AccessPermission.Permission[](2);
+        permissionList[0] = AccessPermission.Permission({
+            ipAccount: ipId,
+            signer: address(spg),
+            to: licensingModuleAddr,
+            func: bytes4(0),
+            permission: AccessPermission.ALLOW
+        });
+        permissionList[1] = AccessPermission.Permission({
+            ipAccount: ipId,
+            signer: address(spg),
+            to: ipResolverAddr,
+            func: bytes4(0),
+            permission: AccessPermission.ALLOW
+        });
+        bytes32 digest = MessageHashUtils.toTypedDataHash(
+            MetaTx.calculateDomainSeparator(ipId),
+            MetaTx.getExecuteStructHash(
+                MetaTx.Execute({
+                    to: accessControllerAddr,
+                    value: 0,
+                    data: abi.encodeWithSignature(
+                        "setBatchPermissions((address,address,address,bytes4,uint8)[])",
+                        permissionList
+                    ),
+                    nonce: 1,
+                    deadline: block.timestamp + 1000
+                })
+            )
+        );
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(alicePk, digest);
+
+        vm.prank(alice);
+        (, ipId) = spg.mintAndRegisterIpWithSig(
+            policyId,
+            address(nft),
+            tokenMetadata,
+            ipMetadata,
+            SPG.Signature({ signer: alice, deadline: block.timestamp + 1000, signature: abi.encodePacked(r, s, v) })
+        );
+        assertTrue(ipAssetRegistry.isRegistered(ipId));
+        _mintAndRegisterDerivativeIpWithSig(ipId, tokenMetadata, ipMetadata);
+    }
+
+    function _mintAndRegisterDerivativeIpWithSig(
+        address ipId,
+        bytes memory tokenMetadata,
+        Metadata.IPMetadata memory ipMetadata
+    ) internal {
+        address derivativeIpId = IPAssetRegistry(ipAssetRegistryAddr).ipId(
+            block.chainid,
+            address(nft),
+            nft.totalSupply()
+        );
+
+        AccessPermission.Permission[] memory permissionList = new AccessPermission.Permission[](2);
+        permissionList[0] = AccessPermission.Permission({
+            ipAccount: derivativeIpId,
+            signer: address(spg),
+            to: licensingModuleAddr,
+            func: bytes4(0),
+            permission: AccessPermission.ALLOW
+        });
+        permissionList[1] = AccessPermission.Permission({
+            ipAccount: derivativeIpId,
+            signer: address(spg),
+            to: ipResolverAddr,
+            func: bytes4(0),
+            permission: AccessPermission.ALLOW
+        });
+        bytes32 digest = MessageHashUtils.toTypedDataHash(
+            MetaTx.calculateDomainSeparator(derivativeIpId),
+            MetaTx.getExecuteStructHash(
+                MetaTx.Execute({
+                    to: accessControllerAddr,
+                    value: 0,
+                    data: abi.encodeWithSignature(
+                        "setBatchPermissions((address,address,address,bytes4,uint8)[])",
+                        permissionList
+                    ),
+                    nonce: 1,
+                    deadline: block.timestamp + 1000
+                })
+            )
+        );
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(bobPk, digest);
+
+        uint256[] memory licenses = new uint256[](1);
+        licenses[0] = licensingModule.mintLicense(policyId, ipId, 1, bob, emptyRoyaltyPolicyLAPInitParams);
+        vm.prank(bob);
+        (, derivativeIpId) = spg.mintAndRegisterDerivativeIpWithSig(
+            licenses,
+            "",
+            address(nft),
+            tokenMetadata,
+            ipMetadata,
+            SPG.Signature({ signer: bob, deadline: block.timestamp + 1000, signature: abi.encodePacked(r, s, v) })
         );
         assertTrue(ipAssetRegistry.isRegistered(derivativeIpId));
     }

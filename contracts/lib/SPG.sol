@@ -30,4 +30,12 @@ library SPG {
         // Time at which the mint should end, or 0 if there is no end time.
         uint256 end;
     }
+
+    /// @notice Signature of ERC712.
+    struct Signature {
+        address signer;
+        uint256 deadline;
+        // abi.encodePacked(r, s, v)
+        bytes signature;
+    }
 }

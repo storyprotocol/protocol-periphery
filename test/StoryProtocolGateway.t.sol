@@ -124,33 +124,6 @@ contract StoryProtocolGatewayTest is ForkTest {
             ipResolverAddr
         );
 
-        vm.prank(GOVERNANCE_ADMIN);
-        moduleRegistry.registerModule("SPG", address(spg));
-
-        vm.prank(GOVERNANCE_ADMIN);
-        accessController.setGlobalPermission(
-            address(spg),
-            address(licensingModule),
-            ILicensingModule.addPolicyToIp.selector,
-            AccessPermission.DENY
-        );
-
-        vm.prank(GOVERNANCE_ADMIN);
-        accessController.setGlobalPermission(
-            address(ipAssetRegistry),
-            address(licensingModule),
-            ILicensingModule.linkIpToParents.selector,
-            AccessPermission.ALLOW
-        );
-
-        vm.prank(GOVERNANCE_ADMIN);
-        accessController.setGlobalPermission(
-            address(spg),
-            address(ipResolver),
-            KeyValueResolver.setValue.selector,
-            AccessPermission.DENY
-        );
-
         vm.prank(alice);
         ipAssetRegistry.setApprovalForAll(address(spg), true);
 
@@ -236,44 +209,6 @@ contract StoryProtocolGatewayTest is ForkTest {
             }),
             SPG.MintSettings({ start: 0, end: 0 })
         );
-    }
-
-    /// @notice Tests that registration and remixing of an existing NFT works.
-    function test_SPG_RegisterIp() public {
-        vm.prank(GOVERNANCE_ADMIN);
-        accessController.setGlobalPermission(
-            address(spg),
-            address(licensingModule),
-            ILicensingModule.addPolicyToIp.selector,
-            AccessPermission.ALLOW
-        );
-
-        vm.prank(GOVERNANCE_ADMIN);
-        accessController.setGlobalPermission(
-            address(spg),
-            address(ipResolver),
-            KeyValueResolver.setValue.selector,
-            AccessPermission.ALLOW
-        );
-        Metadata.Attribute[] memory customIpMetadata = new Metadata.Attribute[](1);
-        customIpMetadata[0] = Metadata.Attribute(IP_CUSTOM_METADATA_KEY, IP_CUSTOM_METADATA_VALUE);
-
-        Metadata.IPMetadata memory ipMetadata = Metadata.IPMetadata({
-            name: IP_METADATA_NAME,
-            hash: IP_METADATA_HASH,
-            url: IP_METADATA_URL,
-            customMetadata: customIpMetadata
-        });
-        vm.prank(alice);
-        address ipId = spg.registerIp(policyId, address(externalNFT), 0, ipMetadata);
-        assertTrue(ipAssetRegistry.isRegistered(ipId));
-
-        uint256 licenseId = licensingModule.mintLicense(policyId, ipId, 1, bob, emptyRoyaltyPolicyLAPInitParams);
-        uint256[] memory licenses = new uint256[](1);
-        licenses[0] = licenseId;
-        vm.prank(bob);
-        address derivativeIpId = spg.registerDerivativeIp(licenses, "", address(externalNFT), 1, ipMetadata);
-        assertTrue(ipAssetRegistry.isRegistered(derivativeIpId));
     }
 
     /// @notice Tests that registration and remixing of an existing NFT works.
@@ -391,7 +326,7 @@ contract StoryProtocolGatewayTest is ForkTest {
     }
 
     /// @notice Tests that registrations of IP by non-owners revert.
-    function test_SPG_RegisterIp_Reverts_InvalidOwner() public {
+    function test_SPG_RegisterIpWithSig_Reverts_InvalidOwner() public {
         Metadata.Attribute[] memory customIpMetadata = new Metadata.Attribute[](1);
         customIpMetadata[0] = Metadata.Attribute(IP_CUSTOM_METADATA_KEY, IP_CUSTOM_METADATA_VALUE);
 
@@ -402,64 +337,13 @@ contract StoryProtocolGatewayTest is ForkTest {
             customMetadata: customIpMetadata
         });
         vm.expectRevert(Errors.SPG__InvalidOwner.selector);
-        spg.registerIp(policyId, address(externalNFT), 0, ipMetadata);
-    }
-
-    /// @notice Tests that registering NFTs minted from the default collection works.
-    function test_SPG_MintAndRegisterIp() public {
-        vm.prank(GOVERNANCE_ADMIN);
-        accessController.setGlobalPermission(
-            address(spg),
-            address(licensingModule),
-            ILicensingModule.addPolicyToIp.selector,
-            AccessPermission.ALLOW
+        spg.registerIpWithSig(
+            policyId,
+            address(externalNFT),
+            0,
+            ipMetadata,
+            SPG.Signature({ signer: bob, deadline: block.timestamp + 1000, signature: "" })
         );
-
-        vm.prank(GOVERNANCE_ADMIN);
-        accessController.setGlobalPermission(
-            address(spg),
-            address(ipResolver),
-            KeyValueResolver.setValue.selector,
-            AccessPermission.ALLOW
-        );
-        Metadata.Attribute[] memory customIpMetadata = new Metadata.Attribute[](1);
-        customIpMetadata[0] = Metadata.Attribute(IP_CUSTOM_METADATA_KEY, IP_CUSTOM_METADATA_VALUE);
-
-        Metadata.IPMetadata memory ipMetadata = Metadata.IPMetadata({
-            name: IP_METADATA_NAME,
-            hash: IP_METADATA_HASH,
-            url: IP_METADATA_URL,
-            customMetadata: customIpMetadata
-        });
-
-        Metadata.Attribute[] memory customTokenMetadata = new Metadata.Attribute[](1);
-        customTokenMetadata[0] = Metadata.Attribute(TOKEN_CUSTOM_METADATA_KEY, TOKEN_CUSTOM_METADATA_VALUE);
-        bytes memory tokenMetadata = abi.encode(
-            Metadata.TokenMetadata({
-                name: TOKEN_METADATA_NAME,
-                description: TOKEN_METADATA_DESCRIPTION,
-                externalUrl: TOKEN_METADATA_URL,
-                image: TOKEN_METADATA_IMAGE,
-                attributes: customTokenMetadata
-            })
-        );
-
-        vm.prank(alice);
-        (, address ipId) = spg.mintAndRegisterIp(policyId, address(nft), tokenMetadata, ipMetadata);
-        assertTrue(ipAssetRegistry.isRegistered(ipId));
-
-        uint256 licenseId = licensingModule.mintLicense(policyId, ipId, 1, bob, emptyRoyaltyPolicyLAPInitParams);
-        uint256[] memory licenses = new uint256[](1);
-        licenses[0] = licenseId;
-        vm.prank(bob);
-        (, address derivativeIpId) = spg.mintAndRegisterDerivativeIp(
-            licenses,
-            "",
-            address(nft),
-            tokenMetadata,
-            ipMetadata
-        );
-        assertTrue(ipAssetRegistry.isRegistered(derivativeIpId));
     }
 
     function test_SPG_MintAndRegisterIpWithSig() public {
@@ -661,9 +545,21 @@ contract StoryProtocolGatewayTest is ForkTest {
         );
 
         vm.expectRevert(Errors.SPG__MintingNotYetStarted.selector);
-        spg.mintAndRegisterIp(policyId, address(token), tokenMetadata, ipMetadata);
+        spg.mintAndRegisterIpWithSig(
+            policyId,
+            address(token),
+            tokenMetadata,
+            ipMetadata,
+            SPG.Signature({ signer: alice, deadline: block.timestamp + 1000, signature: "" })
+        );
         vm.warp(block.timestamp + 100);
         vm.expectRevert(Errors.SPG__MintingAlreadyEnded.selector);
-        spg.mintAndRegisterIp(policyId, address(token), tokenMetadata, ipMetadata);
+        spg.mintAndRegisterIpWithSig(
+            policyId,
+            address(token),
+            tokenMetadata,
+            ipMetadata,
+            SPG.Signature({ signer: alice, deadline: block.timestamp + 1000, signature: "" })
+        );
     }
 }

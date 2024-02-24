@@ -6,6 +6,7 @@ import { IModule } from "@storyprotocol/contracts/interfaces/modules/base/IModul
 
 import { IStoryProtocolDrop } from "./IStoryProtocolDrop.sol";
 import { Metadata } from "../lib/Metadata.sol";
+import { SPG } from "../lib/SPG.sol";
 
 /// @title Story Protocol Gateway Interface
 /// @notice Interface for the Story Protocol Gateway, used as the de facto entrypoint
@@ -16,12 +17,14 @@ interface IStoryProtocolGateway is IStoryProtocolDrop, IModule {
     /// @param tokenContract The address of the contract of the NFT being registered.
     /// @param tokenId The id of the NFT being registered.
     /// @param ipMetadata Metadata related to IP attribution.
+    /// @param signature The signature set permission to SPG.
     /// @return The address identifier of the newly registered IP asset.
-    function registerIp(
+    function registerIpWithSig(
         uint256 policyId,
         address tokenContract,
         uint256 tokenId,
-        Metadata.IPMetadata calldata ipMetadata
+        Metadata.IPMetadata calldata ipMetadata,
+        SPG.Signature calldata signature
     ) external returns (address);
 
     /// @notice Mints a Story Protocol NFT and registers it into the protocol as an IP asset.
@@ -29,11 +32,13 @@ interface IStoryProtocolGateway is IStoryProtocolDrop, IModule {
     /// @param tokenContract The address of the NFT being minted.
     /// @param tokenMetadata Token metadata in bytes to include for NFT minting.
     /// @param ipMetadata Metadata related to IP attribution.
-    function mintAndRegisterIp(
+    /// @param signature The signature set permission to SPG.
+    function mintAndRegisterIpWithSig(
         uint256 policyId,
         address tokenContract,
         bytes calldata tokenMetadata,
-        Metadata.IPMetadata calldata ipMetadata
+        Metadata.IPMetadata calldata ipMetadata,
+        SPG.Signature calldata signature
     ) external returns (uint256 tokenId, address ipId);
 
     /// @notice Registers an existing NFT into the protocol as an IP asset derivative.
@@ -42,12 +47,14 @@ interface IStoryProtocolGateway is IStoryProtocolDrop, IModule {
     /// @param tokenContract The address of the contract of the NFT being registered.
     /// @param tokenId The id of the NFT being registered.
     /// @param ipMetadata Metadata related to IP attribution.
-    function registerDerivativeIp(
+    /// @param signature The signature set permission to SPG.
+    function registerDerivativeIpWithSig(
         uint256[] calldata licenseIds,
         bytes calldata royaltyContext,
         address tokenContract,
         uint256 tokenId,
-        Metadata.IPMetadata calldata ipMetadata
+        Metadata.IPMetadata calldata ipMetadata,
+        SPG.Signature calldata signature
     ) external returns (address);
 
     /// @notice Registers an existing NFT into the protocol as an IP asset derivative.
@@ -56,13 +63,15 @@ interface IStoryProtocolGateway is IStoryProtocolDrop, IModule {
     /// @param tokenContract The address of the NFT being minted.
     /// @param tokenMetadata Token metadata in bytes to include for NFT minting.
     /// @param ipMetadata Metadata related to IP attribution.
+    /// @param signature The signature set permission to SPG.
     /// @return tokenId The id of the newly minted NFT.
     /// @return ipId The address identifier of the newly registered IP asset.
-    function mintAndRegisterDerivativeIp(
+    function mintAndRegisterDerivativeIpWithSig(
         uint256[] calldata licenseIds,
         bytes calldata royaltyContext,
         address tokenContract,
         bytes calldata tokenMetadata,
-        Metadata.IPMetadata calldata ipMetadata
+        Metadata.IPMetadata calldata ipMetadata,
+        SPG.Signature calldata signature
     ) external returns (uint256 tokenId, address ipId);
 }

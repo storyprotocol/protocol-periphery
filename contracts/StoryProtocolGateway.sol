@@ -111,26 +111,6 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
         return ipCollection;
     }
 
-    /// @notice Registers an existing NFT into the protocol as an IP Asset.
-    /// @param policyId The policy that will identify the licensing terms of the IP.
-    /// @param tokenContract The address of the contract of the NFT being registered.
-    /// @param tokenId The id of the NFT being registered.
-    /// @param ipMetadata Metadata related to IP attribution.
-    function registerIp(
-        uint256 policyId,
-        address tokenContract,
-        uint256 tokenId,
-        Metadata.IPMetadata calldata ipMetadata
-    ) external onlyAuthorized(tokenContract, tokenId) returns (address ipId) {
-        ipId = _registerIp(tokenContract, tokenId, ipMetadata.name, ipMetadata.hash, ipMetadata.url);
-
-        if (policyId != 0) {
-            LICENSING_MODULE.addPolicyToIp(ipId, policyId);
-        }
-
-        _setCustomIpMetadata(ipId, ipMetadata.customMetadata);
-    }
-
     /// @notice Registers an existing NFT into the protocol as an IP Asset with user signature.
     /// @dev This function allows the user to set the permission for the SPG with a
     /// signature to allow SPG call other modules like licensing module on behalf of the user.
@@ -149,25 +129,6 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
         ipId = _registerIp(tokenContract, tokenId, ipMetadata.name, ipMetadata.hash, ipMetadata.url);
 
         _setPermissionWithSig(ipId, signature.signer, signature.deadline, signature.signature);
-
-        if (policyId != 0) {
-            LICENSING_MODULE.addPolicyToIp(ipId, policyId);
-        }
-        _setCustomIpMetadata(ipId, ipMetadata.customMetadata);
-    }
-
-    /// @notice Mints a Story Protocol NFT and registers it into the protocol as an IP asset.
-    /// @param tokenContract The address of the NFT bound to the root-level IP.
-    /// @param tokenMetadata Additional token metadata in bytes to include for minting.
-    /// @param ipMetadata Metadata related to IP attribution.
-    function mintAndRegisterIp(
-        uint256 policyId,
-        address tokenContract,
-        bytes calldata tokenMetadata,
-        Metadata.IPMetadata calldata ipMetadata
-    ) external returns (uint256 tokenId, address ipId) {
-        tokenId = _mint(tokenContract, tokenMetadata, msg.sender);
-        ipId = _registerIp(tokenContract, tokenId, ipMetadata.name, ipMetadata.hash, ipMetadata.url);
 
         if (policyId != 0) {
             LICENSING_MODULE.addPolicyToIp(ipId, policyId);
@@ -200,31 +161,6 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
         _setCustomIpMetadata(ipId, ipMetadata.customMetadata);
     }
 
-    /// @notice Registers an existing NFT into the protocol as an IP asset derivative.
-    /// @param licenseIds The licenses to incorporate for the new IP.
-    /// @param royaltyContext The bytes-encoded context for royalty policy to process.
-    /// @param tokenContract The address of the NFT bound to the root-level IP.
-    /// @param tokenId The token id of the NFT bound to the root-level IP.
-    /// @param ipMetadata Metadata related to IP attribution.
-    function registerDerivativeIp(
-        uint256[] calldata licenseIds,
-        bytes calldata royaltyContext,
-        address tokenContract,
-        uint256 tokenId,
-        Metadata.IPMetadata calldata ipMetadata
-    ) external onlyAuthorized(tokenContract, tokenId) returns (address ipId) {
-        ipId = _registerDerivativeIp(
-            licenseIds,
-            royaltyContext,
-            tokenContract,
-            tokenId,
-            ipMetadata.name,
-            ipMetadata.hash,
-            ipMetadata.url
-        );
-        _setCustomIpMetadata(ipId, ipMetadata.customMetadata);
-    }
-
     /// @notice Registers an existing NFT into the protocol as an IP asset derivative with signature.
     /// @dev This function allows the user to set the permission for the SPG with a
     /// signature to allow SPG call other modules like licensing module on behalf of the user.
@@ -252,34 +188,6 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
             ipMetadata.url
         );
         _setPermissionWithSig(ipId, signature.signer, signature.deadline, signature.signature);
-        _setCustomIpMetadata(ipId, ipMetadata.customMetadata);
-    }
-
-    /// @notice Mints and registers a Story Protocol NFT into the protocol as an IP asset derivative.
-    /// @param licenseIds The licenses to incorporate for the new IP.
-    /// @param royaltyContext The bytes-encoded context for royalty policy to process.
-    /// @param tokenContract The address of the NFT bound to the root-level IP.
-    /// @param tokenMetadata Token metadata in bytes to include for NFT minting.
-    /// @param ipMetadata Metadata related to IP attribution.
-    /// @return tokenId The identifier of the minted NFT.
-    /// @return ipId The address identifier of the newly registered IP asset.
-    function mintAndRegisterDerivativeIp(
-        uint256[] calldata licenseIds,
-        bytes calldata royaltyContext,
-        address tokenContract,
-        bytes calldata tokenMetadata,
-        Metadata.IPMetadata calldata ipMetadata
-    ) external returns (uint256 tokenId, address ipId) {
-        tokenId = _mint(tokenContract, tokenMetadata, msg.sender);
-        ipId = _registerDerivativeIp(
-            licenseIds,
-            royaltyContext,
-            tokenContract,
-            tokenId,
-            ipMetadata.name,
-            ipMetadata.hash,
-            ipMetadata.url
-        );
         _setCustomIpMetadata(ipId, ipMetadata.customMetadata);
     }
 

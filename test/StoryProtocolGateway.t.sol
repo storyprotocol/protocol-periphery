@@ -17,7 +17,9 @@ import { Base64 } from "@openzeppelin/contracts/utils/Base64.sol";
 import { IPResolver } from "@storyprotocol/contracts/resolvers/IPResolver.sol";
 import { KeyValueResolver } from "@storyprotocol/contracts/resolvers/KeyValueResolver.sol";
 
+import { stdJson } from "forge-std/StdJson.sol";
 import { MockERC721Cloneable } from "./mocks/nft/MockERC721Cloneable.sol";
+import { StoryProtocolCoreAddressManager } from "script/utils/StoryProtocolCoreAddressManager.sol";
 import { ForkTest } from "./utils/Fork.t.sol";
 import { Errors } from "contracts/lib/Errors.sol";
 import { ERC721SPNFT } from "contracts/nft/ERC721SPNFT.sol";
@@ -26,16 +28,7 @@ import { Metadata } from "contracts/lib/Metadata.sol";
 import { StoryProtocolGateway } from "contracts/StoryProtocolGateway.sol";
 
 /// @title Story Protocol Gateway Test Contract
-contract StoryProtocolGatewayTest is ForkTest {
-    // TODO: Switch to programmatically loading this as a JSON from @protocol-core.
-    address internal GOVERNANCE = address(0x7f7eE01b9af466ff95A62A1D52dA350b0f24A445);
-    address internal GOVERNANCE_ADMIN = address(0xf398C12A45Bc409b6C652E25bb0a3e702492A4ab);
-    address internal ipAssetRegistryAddr = address(0x980d2c331E8fD31D7397d83AA9Bba44EaA4daeBC);
-    address internal licensingModuleAddr = address(0x46d7d7f2450066344B291e182371E8885558568a);
-    address internal ipResolverAddr = address(0xF1d5e6f17580680f106b91E1c00E3896E9fC95AD);
-    address internal accessControllerAddr = address(0xaFfE6DE30Dfa2b35b63789b9aBF45b0A5Da201Eb);
-    address internal pilPolicyFrameworkManagerAddr = address(0x3E881bEB7DeD9610CBCD0049972Ab12c2859170f);
-    address internal moduleRegistryAddr = address(0x20Ec5239BC268b485E4372EA1a287434d2030fD2);
+contract StoryProtocolGatewayTest is ForkTest, StoryProtocolCoreAddressManager {
 
     MockERC721Cloneable internal externalNFT;
     IPAssetRegistry internal ipAssetRegistry;
@@ -77,6 +70,7 @@ contract StoryProtocolGatewayTest is ForkTest {
     StoryProtocolGateway public spg;
 
     function setUp() public virtual override(ForkTest) {
+        _readStoryProtocolCoreAddresses();
         ForkTest.setUp();
         ipAssetRegistry = IPAssetRegistry(ipAssetRegistryAddr);
         licensingModule = ILicensingModule(licensingModuleAddr);

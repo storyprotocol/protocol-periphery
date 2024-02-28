@@ -1,8 +1,8 @@
 {
-  "name": "solidity-template",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "@story-protocol/protocol-periphery",
+  "version": "v1.0.0-beta-rc1",
+  "description": "Story Protocol periphery smart contracts",
+  "main": "",
   "directories": {
     "lib": "lib",
     "test": "test"
@@ -14,7 +14,7 @@
     "test": "npx hardhat test"
   },
   "author": "StoryProtocol",
-  "license": "MIT",
+  "license": "BUSL-1.1",
   "devDependencies": {
     "chai": "^4.3.7",
     "dotenv": "^16.0.3",
@@ -34,7 +34,6 @@
   "dependencies": {
     "@openzeppelin/contracts": "5.0.1",
     "@openzeppelin/contracts-upgradeable": "5.0.1",
-    "@storyprotocol/contracts": "https://github.com/storyprotocol/protocol-core#v1.0.0-beta"
-
+    "@story-protocol/protocol-core": "1.0.0-beta-rc6"
   }
 }

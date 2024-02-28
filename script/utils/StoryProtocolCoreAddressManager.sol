@@ -19,7 +19,7 @@ contract StoryProtocolCoreAddressManager is Script {
 
     function _readStoryProtocolCoreAddresses() internal {
         string memory root = vm.projectRoot();
-        string memory path = string.concat(root, "/node_modules/@storyprotocol/contracts/deploy-out/deployment-11155111.json");
+        string memory path = string.concat(root, "/node_modules/@story-protocol/protocol-core/deploy-out/deployment-11155111.json");
         string memory json = vm.readFile(path);
         GOVERNANCE = json.readAddress(".main.Governance");
         ipAssetRegistryAddr = json.readAddress(".main.IPAssetRegistry");

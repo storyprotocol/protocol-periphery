@@ -621,9 +621,10 @@
   resolved "https://registry.yarnpkg.com/@solidity-parser/parser/-/parser-0.18.0.tgz#8e77a02a09ecce957255a2f48c9a7178ec191908"
   integrity sha512-yfORGUIPgLck41qyN7nbwJRAx17/jAIXCTanHOJZhB6PJ1iAk/84b/xlsVKFSyNyLXIj0dhppoE0+CRws7wlzA==
 
-"@storyprotocol/contracts@https://github.com/storyprotocol/protocol-core#beta-rc5":
-  version "0.3.0"
-  resolved "https://github.com/storyprotocol/protocol-core#c84d0a68f9bac17ce7b7b12ccfccd2fc5e49d0c8"
+"@story-protocol/protocol-core@1.0.0-beta-rc6":
+  version "1.0.0-beta-rc6"
+  resolved "https://registry.yarnpkg.com/@story-protocol/protocol-core/-/protocol-core-1.0.0-beta-rc6.tgz#be833ae95419340816c6f246c40654d0e8a649c0"
+  integrity sha512-2diMjDOpFuKcKZ7BQTdR0jb/W3Etob3cPkewteZvXgYwpLd0MpwPDkujPOM7KijYlp781kDx0ay8TqutgqH5QQ==
   dependencies:
     "@openzeppelin/contracts" "5.0.1"
     "@openzeppelin/contracts-upgradeable" "5.0.1"

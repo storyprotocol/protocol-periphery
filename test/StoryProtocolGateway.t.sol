@@ -4,20 +4,17 @@ pragma solidity ^0.8.23;
 import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
 import { IPAssetRegistry } from "@storyprotocol/contracts/registries/IPAssetRegistry.sol";
-import { LicensingModule } from "@storyprotocol/contracts/modules/licensing/LicensingModule.sol";
 import { ILicensingModule } from "@storyprotocol/contracts/interfaces/modules/licensing/ILicensingModule.sol";
 import { IRoyaltyPolicyLAP } from "@storyprotocol/contracts/interfaces/modules/royalty/policies/IRoyaltyPolicyLAP.sol";
 import { AccessPermission } from "@storyprotocol/contracts/lib/AccessPermission.sol";
 import { MetaTx } from "@storyprotocol/contracts/lib/MetaTx.sol";
 import { ModuleRegistry } from "@storyprotocol/contracts/registries/ModuleRegistry.sol";
+// solhint-disable-next-line max-line-length
 import { PILPolicy, IPILPolicyFrameworkManager, RegisterPILPolicyParams } from "@storyprotocol/contracts/interfaces/modules/licensing/IPILPolicyFrameworkManager.sol";
-import { IP } from "@storyprotocol/contracts/lib/IP.sol";
 import { AccessController } from "@storyprotocol/contracts/AccessController.sol";
 import { Base64 } from "@openzeppelin/contracts/utils/Base64.sol";
 import { IPResolver } from "@storyprotocol/contracts/resolvers/IPResolver.sol";
-import { KeyValueResolver } from "@storyprotocol/contracts/resolvers/KeyValueResolver.sol";
 
-import { stdJson } from "forge-std/StdJson.sol";
 import { MockERC721Cloneable } from "./mocks/nft/MockERC721Cloneable.sol";
 import { StoryProtocolCoreAddressManager } from "script/utils/StoryProtocolCoreAddressManager.sol";
 import { ForkTest } from "./utils/Fork.t.sol";
@@ -29,7 +26,6 @@ import { StoryProtocolGateway } from "contracts/StoryProtocolGateway.sol";
 
 /// @title Story Protocol Gateway Test Contract
 contract StoryProtocolGatewayTest is ForkTest, StoryProtocolCoreAddressManager {
-
     MockERC721Cloneable internal externalNFT;
     IPAssetRegistry internal ipAssetRegistry;
     ILicensingModule internal licensingModule;
@@ -67,7 +63,7 @@ contract StoryProtocolGatewayTest is ForkTest, StoryProtocolCoreAddressManager {
     bytes internal emptyRoyaltyPolicyLAPInitParams;
 
     /// @notice The Story Protocol Gateway SUT.
-    StoryProtocolGateway public spg;
+    StoryProtocolGateway internal spg;
 
     function setUp() public virtual override(ForkTest) {
         _readStoryProtocolCoreAddresses();
@@ -173,6 +169,7 @@ contract StoryProtocolGatewayTest is ForkTest, StoryProtocolCoreAddressManager {
         assertEq(nft.name(), SPG_DEFAULT_NFT_NAME);
         assertEq(nft.symbol(), SPG_DEFAULT_NFT_SYMBOL);
 
+        /* solhint-disable */
         string memory uriEncoding = string(
             abi.encodePacked(
                 '{"description": "Test SPG contract", ',
@@ -181,6 +178,7 @@ contract StoryProtocolGatewayTest is ForkTest, StoryProtocolCoreAddressManager {
                 '"name": "SPG Default Collection"}'
             )
         );
+        /* solhint-enable */
         string memory expectedURI = string(
             abi.encodePacked(
                 "data:application/json;base64,",
@@ -219,7 +217,7 @@ contract StoryProtocolGatewayTest is ForkTest, StoryProtocolCoreAddressManager {
 
         address ipId = IPAssetRegistry(ipAssetRegistryAddr).ipId(block.chainid, address(externalNFT), 0);
 
-        uint deadline = block.timestamp + 1000;
+        uint256 deadline = block.timestamp + 1000;
         AccessPermission.Permission[] memory permissionList = new AccessPermission.Permission[](2);
         permissionList[0] = AccessPermission.Permission({
             ipAccount: ipId,
@@ -270,7 +268,7 @@ contract StoryProtocolGatewayTest is ForkTest, StoryProtocolCoreAddressManager {
     function _registerDerivativeIpWithSig(address ipId, Metadata.IPMetadata memory ipMetadata) internal {
         address derivativeIpId = IPAssetRegistry(ipAssetRegistryAddr).ipId(block.chainid, address(externalNFT), 1);
 
-        uint deadline = block.timestamp + 1000;
+        uint256 deadline = block.timestamp + 1000;
         AccessPermission.Permission[] memory permissionList = new AccessPermission.Permission[](2);
         permissionList[0] = AccessPermission.Permission({
             ipAccount: derivativeIpId,

@@ -8,7 +8,6 @@ import { Errors } from "contracts/lib/Errors.sol";
 
 /// @title ERC721 Cloneable Test Contract
 contract ERC721CloneableTest is ERC721BaseTest {
-
     string internal constant _NAME = "MOCK_NAME";
     string internal constant _SYMBOL = "MOCK_SYMBOL";
     MockERC721Cloneable public cloneable;
@@ -86,13 +85,12 @@ contract ERC721CloneableTest is ERC721BaseTest {
     }
 
     /// @dev Gets the expected name for the ERC721 contract.
-    function _expectedName() internal virtual pure override returns (string memory) {
+    function _expectedName() internal pure virtual override returns (string memory) {
         return _NAME;
     }
 
     /// @dev Gets the expected symbol for the ERC721 contract.
-    function _expectedSymbol() internal virtual pure override returns (string memory) {
+    function _expectedSymbol() internal pure virtual override returns (string memory) {
         return _SYMBOL;
     }
-
 }

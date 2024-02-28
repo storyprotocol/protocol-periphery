@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.23;
 
-import { IERC721Metadata } from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import { IStoryProtocolToken } from "../IStoryProtocolToken.sol";
 
 /// @title ERC-721 Story Protocol NFT Interface

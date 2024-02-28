@@ -7,7 +7,6 @@ import { BaseTest } from "test/utils/Base.t.sol";
 /// @title Transer Helper Contract
 /// @notice Utility contract for creating ERC721 transfer test simulations.
 abstract contract TransferHelper is BaseTest {
-
     // Arbitrary safe transfer data used for safe transfer tests.
     bytes private SAFE_TRANSFER_DATA = "mockERC721SafeTransferFromData";
 
@@ -18,21 +17,24 @@ abstract contract TransferHelper is BaseTest {
     uint256 public TEST_TOKEN = 0;
 
     // Used for identifying transfer types for test reuse.
-    enum TransferType { TRANSFER_FROM, SAFE_TRANSFER_FROM }
+    enum TransferType {
+        TRANSFER_FROM,
+        SAFE_TRANSFER_FROM
+    }
 
     // Encapsulates all details of an ERC721 transfer.
     struct Transfer {
         TransferType transferType; // Type of the transfer
-        address sender;            // Transfer sender
-        address from;              // Original token owner
-        address to;                // Token recipient
-        uint256 id;                // The id of the NFT being transferred.
-        bytes data;                // Additional data to send with the transfer.
+        address sender; // Transfer sender
+        address from; // Original token owner
+        address to; // Token recipient
+        uint256 id; // The id of the NFT being transferred.
+        bytes data; // Additional data to send with the transfer.
     }
 
-    // Internal helper 
-    Transfer internal _t;      // The current transfer being examined.
-    Transfer[] internal _ts;   // The current list of transfers being examined.
+    // Internal helper
+    Transfer internal _t; // The current transfer being examined.
+    Transfer[] internal _ts; // The current list of transfers being examined.
 
     /// @notice Modifier for running multiple transfer simulations for a test.
     modifier runAll(Transfer[] memory transfers) {
@@ -60,7 +62,6 @@ abstract contract TransferHelper is BaseTest {
         return _ts;
     }
 
-
     /// @notice Creates a mixed set of ERC721 transfers.
     function sut_Transfers_TransferFrom() internal returns (Transfer[] memory) {
         delete _ts;
@@ -86,14 +87,15 @@ abstract contract TransferHelper is BaseTest {
         address to,
         uint256 id
     ) internal pure returns (Transfer memory) {
-        return Transfer({
-            transferType: TransferType.TRANSFER_FROM,
-            sender: sender,
-            from: from,
-            to: to,
-            id: id,
-            data: ""
-        });
+        return
+            Transfer({
+                transferType: TransferType.TRANSFER_FROM,
+                sender: sender,
+                from: from,
+                to: to,
+                id: id,
+                data: ""
+            });
     }
 
     /// @dev Returns a built Transfer struct for a `safeTransferFrom` call.
@@ -104,14 +106,15 @@ abstract contract TransferHelper is BaseTest {
         uint256 id,
         bytes memory data
     ) internal pure returns (Transfer memory) {
-        return Transfer({
-            transferType: TransferType.SAFE_TRANSFER_FROM,
-            sender: sender,
-            from: from,
-            to: to,
-            id: id,
-            data: data
-        });
+        return
+            Transfer({
+                transferType: TransferType.SAFE_TRANSFER_FROM,
+                sender: sender,
+                from: from,
+                to: to,
+                id: id,
+                data: data
+            });
     }
 
     /// @dev Performs a transfer, while ensuring balances and events are as expected.

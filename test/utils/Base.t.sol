@@ -5,7 +5,6 @@ import { Test } from "forge-std/Test.sol";
 
 /// @title Base Test Contract
 contract BaseTest is Test {
-
     // Test public keys EOAs for deriving reusable EOA addresses.
     uint256 internal alicePk = 0xa11ce;
     uint256 internal bobPk = 0xb0b;

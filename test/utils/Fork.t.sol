@@ -5,12 +5,11 @@ import { BaseTest } from "./Base.t.sol";
 
 /// @title Fork Test Contract
 contract ForkTest is BaseTest {
-
     // List of fork identifiers.
-    uint256 sepoliaFork;
+    uint256 internal sepoliaFork;
 
     // List of chain RPC URLs.
-    string SEPOLIA_RPC_URL = vm.envString("SEPOLIA_URL");
+    string internal SEPOLIA_RPC_URL = vm.envString("SEPOLIA_RPC_URL");
 
     /// @notice Sets up the base test contract.
     function setUp() public virtual override(BaseTest) {
@@ -19,4 +18,3 @@ contract ForkTest is BaseTest {
         BaseTest.setUp();
     }
 }
-

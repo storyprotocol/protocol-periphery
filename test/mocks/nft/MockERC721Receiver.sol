@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.23;
 
-import '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol';
+import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 import { Errors } from "contracts/lib/Errors.sol";
 
 /// @title Mock ERC-721 Receiver
 /// @notice This contract is used to test ERC-721 safe transfers.
 contract MockERC721Receiver is IERC721Receiver {
-
     /// @notice Custom event used to vet whether a receive was successful.
     event ERC721Received(address operator, address from, uint256 tokenId, bytes data);
 

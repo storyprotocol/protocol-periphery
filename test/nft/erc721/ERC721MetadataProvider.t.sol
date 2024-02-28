@@ -11,50 +11,44 @@ import { Metadata } from "contracts/lib/Metadata.sol";
 
 /// @title ERC721 Metadata Provider Test Contract
 contract ERC721MetadataProviderTest is BaseTest {
-
     /// @notice Test contract metadata.
-    string public constant CONTRACT_DESCRIPTION = "SP NFT Test Contract Description";
-    string public constant CONTRACT_IMAGE = "https://storyprotocol.xyz/image.png";
-    string public constant CONTRACT_URI = "https://storyprotocol.xyz";
-    string public constant CONTRACT_NAME = "Test Contract";
-    string public constant CONTRACT_SYMBOL = "Test Symbol";
+    string internal constant CONTRACT_DESCRIPTION = "SP NFT Test Contract Description";
+    string internal constant CONTRACT_IMAGE = "https://storyprotocol.xyz/image.png";
+    string internal constant CONTRACT_URI = "https://storyprotocol.xyz";
+    string internal constant CONTRACT_NAME = "Test Contract";
+    string internal constant CONTRACT_SYMBOL = "Test Symbol";
 
     /// @notice Test token metadata.
-    string public constant TOKEN_NAME = "SP NFT #1";
-    string public constant TOKEN_DESCRIPTION = "This is a SP token";
-    string public constant TOKEN_URL = "https://storyprotocol.xyz/token/1";
-    string public constant TOKEN_IMAGE = "reddit.com/r/storyprotocol/image.png";
+    string internal constant TOKEN_NAME = "SP NFT #1";
+    string internal constant TOKEN_DESCRIPTION = "This is a SP token";
+    string internal constant TOKEN_URL = "https://storyprotocol.xyz/token/1";
+    string internal constant TOKEN_IMAGE = "reddit.com/r/storyprotocol/image.png";
 
     /// @notice Test token attributes.
-    string public constant ATTR_1_KEY = "Color";
-    string public constant ATTR_1_VALUE = "Blue";
-    string public constant ATTR_2_KEY = "Size";
-    string public constant ATTR_2_VALUE = "Medium";
-    string public constant ATTR_3_KEY = "Material";
-    string public constant ATTR_3_VALUE = "Cotton";
+    string internal constant ATTR_1_KEY = "Color";
+    string internal constant ATTR_1_VALUE = "Blue";
+    string internal constant ATTR_2_KEY = "Size";
+    string internal constant ATTR_2_VALUE = "Medium";
+    string internal constant ATTR_3_KEY = "Material";
+    string internal constant ATTR_3_VALUE = "Cotton";
 
     /// @notice Test token id.
-    uint256 TEST_TOKEN = 0;
+    uint256 internal TEST_TOKEN = 0;
 
     /// @notice Mock SP NFT for testing metadata provider setting.
-    MockERC721SPNFT public spNFT;
+    MockERC721SPNFT internal spNFT;
 
     /// @notice The metadata provider SUT.
-    ERC721MetadataProvider public provider;
+    ERC721MetadataProvider internal provider;
 
     /// @notice Test token metadata (encoded).
-    bytes testTokenData;
+    bytes internal testTokenData;
 
     /// @notice Initializes the ERC721 Metadata Provider Test
     function setUp() public virtual override(BaseTest) {
         BaseTest.setUp();
 
-        testTokenData = _generateTokenMetadata(
-            TOKEN_NAME,
-            TOKEN_DESCRIPTION,
-            TOKEN_URL,
-            TOKEN_IMAGE
-        );
+        testTokenData = _generateTokenMetadata(TOKEN_NAME, TOKEN_DESCRIPTION, TOKEN_URL, TOKEN_IMAGE);
 
         Metadata.ContractData memory contractData = Metadata.ContractData({
             description: CONTRACT_DESCRIPTION,
@@ -64,12 +58,7 @@ contract ERC721MetadataProviderTest is BaseTest {
 
         provider = new ERC721MetadataProvider();
         spNFT = new MockERC721SPNFT();
-        spNFT.initialize(
-            address(provider),
-            abi.encode(contractData),
-            CONTRACT_NAME,
-            CONTRACT_SYMBOL
-        );
+        spNFT.initialize(address(provider), abi.encode(contractData), CONTRACT_NAME, CONTRACT_SYMBOL);
     }
 
     /// @notice Tests that the metadata provider initialization is successful.
@@ -79,37 +68,49 @@ contract ERC721MetadataProviderTest is BaseTest {
 
     /// @notice Tests that the metadata provider contract URI works as expected.
     function test_ERC721MetadataProvider_ContractURI() public {
-        string memory uriEncoding = string(abi.encodePacked(
-            '{"description": "SP NFT Test Contract Description", ',
-            '"external_link": "https://storyprotocol.xyz", ',
-            '"image": "https://storyprotocol.xyz/image.png", ',
-            '"name": "Test Contract"}'
-        ));
-        string memory expectedURI = string(abi.encodePacked(
-            "data:application/json;base64,",
-            Base64.encode(bytes(string(abi.encodePacked(uriEncoding))))
-        ));
+        /* solhint-disable */
+        string memory uriEncoding = string(
+            abi.encodePacked(
+                '{"description": "SP NFT Test Contract Description", ',
+                '"external_link": "https://storyprotocol.xyz", ',
+                '"image": "https://storyprotocol.xyz/image.png", ',
+                '"name": "Test Contract"}'
+            )
+        );
+        /* solhint-enable */
+        string memory expectedURI = string(
+            abi.encodePacked(
+                "data:application/json;base64,",
+                Base64.encode(bytes(string(abi.encodePacked(uriEncoding))))
+            )
+        );
         assertEq(provider.contractURI(), expectedURI);
     }
 
     /// @notice Tests that the token URI correctly renders for a SP NFT.
     function test_ERC721MetadataProvider_TokenURI() public {
         spNFT.mint(alice, testTokenData);
-        string memory uriEncoding = string(abi.encodePacked(
-            '{"description": "This is a SP token", ',
-            '"external_url": "https://storyprotocol.xyz/token/1", ',
-            '"image": "reddit.com/r/storyprotocol/image.png", ',
-            '"name": "SP NFT #1", ',
-            '"attributes": [',
-            '{"trait_type": "Color", "value": "Blue"}, ',
-            '{"trait_type": "Size", "value": "Medium"}, ',
-            '{"trait_type": "Material", "value": "Cotton"}',
-            ']}'
-        ));
-        string memory expectedURI = string(abi.encodePacked(
-            "data:application/json;base64,",
-            Base64.encode(bytes(string(abi.encodePacked(uriEncoding))))
-        ));
+        /* solhint-disable */
+        string memory uriEncoding = string(
+            abi.encodePacked(
+                '{"description": "This is a SP token", ',
+                '"external_url": "https://storyprotocol.xyz/token/1", ',
+                '"image": "reddit.com/r/storyprotocol/image.png", ',
+                '"name": "SP NFT #1", ',
+                '"attributes": [',
+                '{"trait_type": "Color", "value": "Blue"}, ',
+                '{"trait_type": "Size", "value": "Medium"}, ',
+                '{"trait_type": "Material", "value": "Cotton"}',
+                "]}"
+            )
+        );
+        /* solhint-enable */
+        string memory expectedURI = string(
+            abi.encodePacked(
+                "data:application/json;base64,",
+                Base64.encode(bytes(string(abi.encodePacked(uriEncoding))))
+            )
+        );
         assertEq(provider.tokenURI(0), expectedURI);
     }
 
@@ -180,7 +181,12 @@ contract ERC721MetadataProviderTest is BaseTest {
     // }
 
     /// @dev Generates bytes-encoded token metadata.
-    function _generateTokenMetadata(string memory name, string memory description, string memory url, string memory image) internal pure returns (bytes memory) {
+    function _generateTokenMetadata(
+        string memory name,
+        string memory description,
+        string memory url,
+        string memory image
+    ) internal pure returns (bytes memory) {
         Metadata.Attribute[] memory attributes = new Metadata.Attribute[](3);
         attributes[0] = Metadata.Attribute(ATTR_1_KEY, ATTR_1_VALUE);
         attributes[1] = Metadata.Attribute(ATTR_2_KEY, ATTR_2_VALUE);

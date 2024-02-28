@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.23;
 
@@ -10,7 +9,6 @@ import { SPG } from "contracts/lib/SPG.sol";
 
 /// @title Mock ERC721 Cloneable
 contract MockERC721SPNFT is IERC721SPNFT, ERC721Cloneable {
-
     /// @dev Gets the current metadata provider used for new NFTs in the collection.
     IERC721MetadataProvider internal _metadataProvider;
 
@@ -68,8 +66,5 @@ contract MockERC721SPNFT is IERC721SPNFT, ERC721Cloneable {
     }
 
     /// @notice Configures the minting settings for an ongoing Story Protocol mint.
-    function configureMint(
-        address spg,
-        SPG.MintSettings calldata mintSettings
-    ) external {}
+    function configureMint(address spg, SPG.MintSettings calldata mintSettings) external {}
 }

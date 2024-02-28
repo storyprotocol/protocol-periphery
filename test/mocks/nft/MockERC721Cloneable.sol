@@ -5,12 +5,8 @@ import { ERC721Cloneable } from "contracts/nft/ERC721Cloneable.sol";
 
 /// @title Mock ERC721 Cloneable
 contract MockERC721Cloneable is ERC721Cloneable {
-
     /// @notice Initializes the mock ERC721 cloneable contract.
-    function initialize(
-        string memory tokenName,
-        string memory tokenSymbol
-    ) public initializer {
+    function initialize(string memory tokenName, string memory tokenSymbol) public initializer {
         __ERC721Cloneable_init(tokenName, tokenSymbol);
     }
 
@@ -30,4 +26,3 @@ contract MockERC721Cloneable is ERC721Cloneable {
         return "";
     }
 }
-

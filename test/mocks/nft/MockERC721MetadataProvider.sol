@@ -3,11 +3,9 @@ pragma solidity ^0.8.23;
 
 import { IERC721MetadataProvider } from "contracts/interfaces/nft/IERC721MetadataProvider.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { Errors } from "contracts/lib/Errors.sol";
 
 /// @title Mock ERC-721 Metadata Provider
 contract MockERC721MetadataProvider is IERC721MetadataProvider, Initializable {
-
     /// @dev Sample metadata schema that the provider requires for tokens.
     struct TokenMetadata {
         string url;
@@ -23,10 +21,10 @@ contract MockERC721MetadataProvider is IERC721MetadataProvider, Initializable {
     mapping(uint256 => bytes) internal _metadata;
 
     /// @dev Tracks the token associated with the metadata provider.
-    address _token;
-    
+    address internal _token;
+
     /// @dev Tracks the contract URL.
-    string _contractURL;
+    string internal _contractURL;
 
     /// @notice Initializes the metadata provider for the provided erc-721 token.
     /// @param tokenAddr The address of the ERC-721 metadata is being provided for.

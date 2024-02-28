@@ -4,7 +4,6 @@ pragma solidity ^0.8.23;
 import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import { IERC721Metadata } from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import { MockERC721Receiver } from "test/mocks/nft/MockERC721Receiver.sol";
-import { BaseTest } from "test/utils/Base.t.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import { TransferHelper } from "./TransferHelper.sol";
 import { Errors } from "contracts/lib/Errors.sol";
@@ -12,12 +11,12 @@ import { Errors } from "contracts/lib/Errors.sol";
 /// @title ERC721 Base Test Contract
 /// @notice Base contract for testing standard ERC721 functionality.
 abstract contract ERC721BaseTest is TransferHelper {
-
     // Expected return value by contract recipients for ERC-721 safe transfers.
-    bytes4 constant ERC721_RECEIVER_MAGIC_VALUE = bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));
+    bytes4 internal constant ERC721_RECEIVER_MAGIC_VALUE =
+        bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));
 
     /// @notice The ERC721 token contract SUT.
-    IERC721Metadata public token;
+    IERC721Metadata internal token;
 
     /// @notice Initializes the base ERC721 contract for testing.
     function setUp() public virtual override(TransferHelper) {
@@ -133,9 +132,8 @@ abstract contract ERC721BaseTest is TransferHelper {
     }
 
     /// @dev Gets the expected name for the ERC721 contract.
-    function _expectedName() internal virtual pure returns (string memory);
+    function _expectedName() internal pure virtual returns (string memory);
 
     /// @dev Gets the expected symbol for the ERC721 contract.
-    function _expectedSymbol() internal virtual pure returns (string memory);
-
+    function _expectedSymbol() internal pure virtual returns (string memory);
 }

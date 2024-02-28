@@ -5,6 +5,7 @@ pragma solidity ^0.8.23;
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+// solhint-disable-next-line max-line-length
 import { PILPolicy, PILPolicyFrameworkManager, RegisterPILPolicyParams } from "@storyprotocol/contracts/modules/licensing/PILPolicyFrameworkManager.sol";
 import { BaseModule } from "@storyprotocol/contracts/modules/BaseModule.sol";
 import { IPAssetRegistry } from "@storyprotocol/contracts/registries/IPAssetRegistry.sol";
@@ -224,15 +225,11 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
         _setCustomIpMetadata(ipId, ipMetadata.customMetadata);
     }
 
-    // TODO: Implement the function once `IPolicyFrameworkManager` has `registerPolicy` function exposed.
-    // function createPolicy(address policyFrameworkManager, bytes memory policyData) external returns (uint256 policyId) {
-    //     policyId = IPolicyFrameworkManager(policyFrameworkManager).registerPolicy(policyData);
-    // }
-
     /// @notice Create a new policy to Licensing Module via the PIL Policy Framework Manager.
     /// @param pilPolicy The PIL policy to add to the Licensing Module.
     /// @param transferable Whether or not the license is transferable.
-    /// @param royaltyPolicy Address of a royalty policy contract (e.g. RoyaltyPolicyLAP) that will handle royalty payments.
+    /// @param royaltyPolicy Address of a royalty policy contract (e.g. RoyaltyPolicyLAP) that will handle royalty
+    /// payments.
     /// @param mintingFee Fee to be paid when minting a license.
     /// @param mintingFeeToken Token to be used to pay the minting fee.
     /// @return policyId The ID of the newly registered policy.
@@ -257,7 +254,8 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
     /// @notice Add a PIL policy to an IPAsset. Create a new PIL policy if it doesn't exist.
     /// @param pilPolicy The PIL policy to add to the Licensing Module.
     /// @param transferable Whether or not the license is transferable.
-    /// @param royaltyPolicy Address of a royalty policy contract (e.g. RoyaltyPolicyLAP) that will handle royalty payments.
+    /// @param royaltyPolicy Address of a royalty policy contract (e.g. RoyaltyPolicyLAP) that will handle royalty
+    /// payments.
     /// @param mintingFee Fee to be paid when minting a license.
     /// @param mintingFeeToken Token to be used to pay the minting fee.
     /// @param ipId The address of the IP asset to add the policy to.
@@ -321,7 +319,8 @@ contract StoryProtocolGateway is BaseModule, ERC721SPNFTFactory, IStoryProtocolG
     /// @param amount The amount of licenses to mint.
     /// @param royaltyContext The bytes-encoded context for royalty policy to process.
     /// @param transferable Whether or not the license is transferable.
-    /// @param royaltyPolicy Address of a royalty policy contract (e.g. RoyaltyPolicyLAP) that will handle royalty payments.
+    /// @param royaltyPolicy Address of a royalty policy contract (e.g. RoyaltyPolicyLAP) that will handle royalty
+    /// payments.
     /// @param mintingFee Fee to be paid when minting a license.
     /// @param mintingFeeToken Token to be used to pay the minting fee.
     /// @return licenseId The ID of the minted license NFT.

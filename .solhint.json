@@ -16,6 +16,10 @@
     "no-inline-assembly": "off",
     "avoid-low-level-calls": "off",
     "no-global-import": "error",
-    "prettier/prettier": "error"
+    "prettier/prettier": "error",
+    "private-vars-leading-underscore": "off",
+    "func-name-mixedcase": "off",
+    "var-name-mixedcase": "off",
+    "modifier-name-mixedcase": "off"
   }
 }

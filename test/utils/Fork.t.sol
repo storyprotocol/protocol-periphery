@@ -10,7 +10,7 @@ contract ForkTest is BaseTest {
     uint256 sepoliaFork;
 
     // List of chain RPC URLs.
-    string SEPOLIA_RPC_URL = vm.envString("SEPOLIA_RPC_URL");
+    string SEPOLIA_RPC_URL = vm.envString("SEPOLIA_URL");
 
     /// @notice Sets up the base test contract.
     function setUp() public virtual override(BaseTest) {

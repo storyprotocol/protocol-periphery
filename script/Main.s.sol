@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
-import { IPAssetRegistry } from "@storyprotocol/contracts/registries/IPAssetRegistry.sol";
+import { IPAssetRegistry } from "@story-protocol/protocol-core/contracts/registries/IPAssetRegistry.sol";
 
 import { console2 } from "forge-std/console2.sol";
 import { Script } from "forge-std/Script.sol";

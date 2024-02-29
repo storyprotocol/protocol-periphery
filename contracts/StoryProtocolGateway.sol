@@ -5,16 +5,15 @@ pragma solidity ^0.8.23;
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-// solhint-disable-next-line max-line-length
-import { PILPolicy, PILPolicyFrameworkManager, RegisterPILPolicyParams } from "@storyprotocol/contracts/modules/licensing/PILPolicyFrameworkManager.sol";
-import { BaseModule } from "@storyprotocol/contracts/modules/BaseModule.sol";
-import { IPAssetRegistry } from "@storyprotocol/contracts/registries/IPAssetRegistry.sol";
-import { ILicensingModule } from "@storyprotocol/contracts/interfaces/modules/licensing/ILicensingModule.sol";
-import { IP } from "@storyprotocol/contracts/lib/IP.sol";
-import { IPResolver } from "@storyprotocol/contracts/resolvers/IPResolver.sol";
-import { IIPAccount } from "@storyprotocol/contracts/interfaces/IIPAccount.sol";
-import { AccessPermission } from "@storyprotocol/contracts/lib/AccessPermission.sol";
-import { IAccessController } from "@storyprotocol/contracts/interfaces/IAccessController.sol";
+import { PILPolicy, PILPolicyFrameworkManager, RegisterPILPolicyParams } from "@story-protocol/protocol-core/contracts/modules/licensing/PILPolicyFrameworkManager.sol";
+import { BaseModule } from "@story-protocol/protocol-core/contracts/modules/BaseModule.sol";
+import { IPAssetRegistry } from "@story-protocol/protocol-core/contracts/registries/IPAssetRegistry.sol";
+import { ILicensingModule } from "@story-protocol/protocol-core/contracts/interfaces/modules/licensing/ILicensingModule.sol";
+import { IP } from "@story-protocol/protocol-core/contracts/lib/IP.sol";
+import { IPResolver } from "@story-protocol/protocol-core/contracts/resolvers/IPResolver.sol";
+import { IIPAccount } from "@story-protocol/protocol-core/contracts/interfaces/IIPAccount.sol";
+import { AccessPermission } from "@story-protocol/protocol-core/contracts/lib/AccessPermission.sol";
+import { IAccessController } from "@story-protocol/protocol-core/contracts/interfaces/IAccessController.sol";
 
 import { SPG } from "./lib/SPG.sol";
 import { Metadata } from "./lib/Metadata.sol";

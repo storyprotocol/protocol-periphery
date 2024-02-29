@@ -4,7 +4,7 @@ pragma solidity ^0.8.23;
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
-import { IERC721MetadataProvider } from "..//interfaces/nft/IERC721MetadataProvider.sol";
+import { IERC721MetadataProvider } from "../interfaces/nft/IERC721MetadataProvider.sol";
 import { ERC721Cloneable } from "./ERC721Cloneable.sol";
 import { Errors } from "../lib/Errors.sol";
 import { SPG } from "../lib/SPG.sol";

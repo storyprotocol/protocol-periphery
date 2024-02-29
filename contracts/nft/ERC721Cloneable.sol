@@ -5,7 +5,8 @@ import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol
 import { IERC721Metadata } from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { Errors } from "contracts/lib/Errors.sol";
+
+import { Errors } from "../lib/Errors.sol";
 
 /// @title Minimal ERC-721 Cloneable Contract
 /// @notice Minimal cloneable ERC-721 contract supporting the metadata extension.

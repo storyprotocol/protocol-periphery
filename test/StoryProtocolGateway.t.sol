@@ -4,18 +4,18 @@ pragma solidity ^0.8.23;
 import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
 import { IPAssetRegistry } from "@story-protocol/protocol-core/contracts/registries/IPAssetRegistry.sol";
-import { LicensingModule } from "@story-protocol/protocol-core/contracts/modules/licensing/LicensingModule.sol";
+// solhint-disable-next-line
 import { ILicensingModule } from "@story-protocol/protocol-core/contracts/interfaces/modules/licensing/ILicensingModule.sol";
+// solhint-disable-next-line
 import { IRoyaltyPolicyLAP } from "@story-protocol/protocol-core/contracts/interfaces/modules/royalty/policies/IRoyaltyPolicyLAP.sol";
 import { AccessPermission } from "@story-protocol/protocol-core/contracts/lib/AccessPermission.sol";
 import { MetaTx } from "@story-protocol/protocol-core/contracts/lib/MetaTx.sol";
 import { ModuleRegistry } from "@story-protocol/protocol-core/contracts/registries/ModuleRegistry.sol";
+// solhint-disable-next-line
 import { PILPolicy, IPILPolicyFrameworkManager, RegisterPILPolicyParams } from "@story-protocol/protocol-core/contracts/interfaces/modules/licensing/IPILPolicyFrameworkManager.sol";
-import { IP } from "@story-protocol/protocol-core/contracts/lib/IP.sol";
 import { AccessController } from "@story-protocol/protocol-core/contracts/AccessController.sol";
 import { Base64 } from "@openzeppelin/contracts/utils/Base64.sol";
 import { IPResolver } from "@story-protocol/protocol-core/contracts/resolvers/IPResolver.sol";
-import { KeyValueResolver } from "@story-protocol/protocol-core/contracts/resolvers/KeyValueResolver.sol";
 
 import { MockERC721Cloneable } from "./mocks/nft/MockERC721Cloneable.sol";
 import { StoryProtocolCoreAddressManager } from "script/utils/StoryProtocolCoreAddressManager.sol";

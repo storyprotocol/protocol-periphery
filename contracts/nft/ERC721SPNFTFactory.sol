@@ -3,6 +3,7 @@
 pragma solidity ^0.8.23;
 
 import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
+
 import { ERC721SPNFT } from "./ERC721SPNFT.sol";
 import { ERC721MetadataProvider } from "./ERC721MetadataProvider.sol";
 import { SPG } from "../lib/SPG.sol";

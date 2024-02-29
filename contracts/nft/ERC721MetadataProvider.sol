@@ -2,12 +2,12 @@
 pragma solidity ^0.8.23;
 
 import { Base64 } from "@openzeppelin/contracts/utils/Base64.sol";
-
-import { IERC721SPNFT } from "contracts/interfaces/nft/IERC721SPNFT.sol";
-import { IERC721MetadataProvider } from "contracts/interfaces/nft/IERC721MetadataProvider.sol";
-import { Metadata } from "contracts/lib/Metadata.sol";
-import { Errors } from "contracts/lib/Errors.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
+import { IERC721SPNFT } from "../interfaces/nft/IERC721SPNFT.sol";
+import { IERC721MetadataProvider } from "../interfaces/nft/IERC721MetadataProvider.sol";
+import { Metadata } from "../lib/Metadata.sol";
+import { Errors } from "../lib/Errors.sol";
 
 /// @title ERC-721 Metadata Provider
 /// @notice Contract for storing ERC-721 JSON compliant metadata.
